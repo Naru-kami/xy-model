@@ -3,8 +3,8 @@ import createFastContext from "./FastContext";
 export type StoreType = {
   T: number,
   N: 32 | 64 | 128 | 256 | 512,
-  dt: number,
-  data: Data
+  magnetization: {x: number[], y: number[], cumulative: number[], length: number[]},
+  data: Data,
 }
 
 class Data {
@@ -13,13 +13,15 @@ class Data {
   data: Float64Array;
   pixelData: ImageData;
   beta: number;
+  MCstep: () => void;
   rAF?: number;
 
   constructor(N: number) {
     this.canvas = new OffscreenCanvas(N, N);
     this.pixelData = new ImageData(N, N);
     this.data = new Float64Array(N * N);
-    this.beta = 5;
+    this.beta = 1;
+    this.MCstep = this.metropolis;
   }
 
   private hslToRgb(h: number, s = 1, l = 0.5) {
@@ -67,7 +69,7 @@ class Data {
     return Math.hypot(sumX, sumY) / this.data.length;
   }
 
-  step() {
+  metropolis() {
     const width = this.pixelData.width;
     const height = this.pixelData.height;
 
@@ -98,6 +100,10 @@ class Data {
     }
   }
 
+  step() {
+    this.MCstep.call(this);
+  }
+
   render() {
     if (!this.viewport) return;
 
@@ -126,8 +132,13 @@ class Data {
 const Store: StoreType = {
   T: 1,
   N: 32,
-  dt: 100,
-  data: new Data(32)
+  magnetization: {
+    x: [],
+    y: [],
+    cumulative: [],
+    length: []
+  },
+  data: new Data(32),
 }
 
 const { Provider, useStore } = createFastContext(Store);

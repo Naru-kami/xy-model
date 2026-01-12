@@ -1,4 +1,4 @@
-import { useCallback, useId } from 'react'
+import { useCallback, useId, useState } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
@@ -56,7 +56,7 @@ function Sliders() {
   return <div className="input-sliders">
     <div className="input-wrapper">
       <label htmlFor={id2}>
-        Grid Size: {N}
+        <InlineMath math="N" />: {N}
       </label>
       <input
         type="range"
@@ -94,23 +94,23 @@ function Sliders() {
 }
 
 function Buttons() {
+  const [isPlaying, setIsPlaying] = useState(false);
   const [data] = useStore(store => store.data);
 
   const handlePlay = useCallback(() => {
-    data.play();
-  }, [])
-
-  const handlePause = useCallback(() => {
-    data.pause();
-  }, [])
+    isPlaying ? data.pause() : data.play();
+    setIsPlaying(p => !p);
+  }, [isPlaying]);
 
   const handleStep = useCallback(() => {
+    setIsPlaying(false)
     data.pause();
     data.step();
     data.render();
   }, []);
 
   const handleReset = useCallback(() => {
+    setIsPlaying(false);
     data.pause();
     data.initializeData();
     data.render();
@@ -118,8 +118,7 @@ function Buttons() {
 
   return (
     <div className="input-buttons">
-      <button className="btn start" onClick={handlePlay}>Start</button>
-      <button className="btn stop" onClick={handlePause}>Stop</button>
+      <button className={`btn ${isPlaying ? "stop" : "start"}`} onClick={handlePlay}>{isPlaying? "Stop" : "Start"}</button>
       <button className="btn step" onClick={handleStep}>Step</button>
       <button className="btn reset" onClick={handleReset}>Reset</button>
     </div>
