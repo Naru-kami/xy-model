@@ -14,7 +14,7 @@ class Data {
   data: Float64Array;
   pixelData: ImageData;
   beta: number;
-  MCstep: () => void;
+  step: () => void;
   rAF?: number;
 
   constructor(N: number) {
@@ -22,7 +22,7 @@ class Data {
     this.pixelData = new ImageData(N, N);
     this.data = new Float64Array(N * N);
     this.beta = 1;
-    this.MCstep = this.metropolis;
+    this.step = this.metropolis;
   }
 
   private hslToRgb(h: number, s = 1, l = 0.5) {
@@ -104,10 +104,6 @@ class Data {
 
   cluster() {
 
-  }
-
-  step() {
-    this.MCstep.call(this);
   }
 
   render() {

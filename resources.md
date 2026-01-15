@@ -18,3 +18,6 @@
 # Wiki
 - https://en.wikipedia.org/wiki/Classical_XY_model
 - https://en.wikipedia.org/wiki/Berezinskii%E2%80%93Kosterlitz%E2%80%93Thouless_transition
+# Old Reports
+- https://www.hiskp.uni-bonn.de/uploads/media/xy_cuda.pdf
+- https://www.emanuelschmidt.eu/physik/ising.pdf
