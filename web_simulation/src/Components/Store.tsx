@@ -4,7 +4,8 @@ export type StoreType = {
   isDark: boolean,
   T: number,
   N: 32 | 64 | 128 | 256 | 512,
-  magnetization: { x: (number | null)[], y: (number | null)[], cumulative: (number | null)[], length: (number | null)[] },
+  magnetization: { x: number[], y: (number | null)[] },
+  susceptibility: { x: number[], y: (number | null)[] },
   worker?: Worker,
 }
 
@@ -13,10 +14,12 @@ const Store: StoreType = {
   T: 1,
   N: 32,
   magnetization: {
-    x: new Array(201).fill(null),
+    x: Array.from({ length: 201 }, (_, i) => i * 0.01),
     y: new Array(201).fill(null),
-    cumulative: new Array(201).fill(null),
-    length: new Array(201).fill(null)
+  },
+  susceptibility: {
+    x: Array.from({ length: 201 }, (_, i) => i * 0.01),
+    y: new Array(201).fill(null),
   },
 }
 

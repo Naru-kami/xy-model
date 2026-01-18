@@ -1,8 +1,8 @@
-import { useCallback, useId, useState } from 'react'
+import { useCallback, useId, useRef, useState } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
-import type { DataMessage } from './Worker';
+import type { MessageToWorker } from './Worker';
 
 const sizes = {
   1: 32,
@@ -32,7 +32,7 @@ function Sliders() {
       p.worker?.postMessage([{
         property: "beta",
         value: 1 / Number(e.target.value),
-      }] satisfies DataMessage)
+      }] satisfies MessageToWorker)
 
       return {
         ...p,
@@ -49,11 +49,11 @@ function Sliders() {
       p.worker?.postMessage([
         {
           method: "resize",
-          parameters: [sizes[val as keyof typeof sizes]]
+          parameters: [sizes[val as keyof typeof sizes], sizes[val as keyof typeof sizes]]
         },
         { method: "initializeData" },
         { method: "render" },
-      ] satisfies DataMessage)
+      ] satisfies MessageToWorker)
 
       return {
         ...p,
@@ -105,34 +105,17 @@ function Sliders() {
 
 function Buttons() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [worker] = useStore(store => store.worker);
+  const [worker, setStore] = useStore(store => store.worker);
+
+  const timer = useRef<number>(null);
 
   const handlePlay = useCallback(() => {
     isPlaying ? worker?.postMessage([{
       method: "pause",
-    }] satisfies DataMessage) : worker?.postMessage([{
+    }] satisfies MessageToWorker) : worker?.postMessage([{
       method: "play",
-    }] satisfies DataMessage);
+    }] satisfies MessageToWorker);
 
-    // setStore(p => {
-    //   const m = p.data.magnetization();
-    //   const idx = Math.round(p.T / 0.01);
-
-    //   p.magnetization.x = [...p.magnetization.x];
-    //   p.magnetization.y = [...p.magnetization.y];
-
-    //   p.magnetization.cumulative[idx] = (p.magnetization.cumulative[idx] ?? 0) + m;
-    //   p.magnetization.length[idx] = (p.magnetization.length[idx] ?? 0) + 1;
-    //   p.magnetization.x[idx] = p.T;
-    //   p.magnetization.y[idx] = p.magnetization.cumulative[idx]! / p.magnetization.length[idx]!;
-
-    //   return {
-    //     ...p,
-    //     magnetization: {
-    //       ...p.magnetization,
-    //     }
-    //   };
-    // })
     setIsPlaying(p => !p);
   }, [worker, isPlaying]);
 
@@ -142,7 +125,7 @@ function Buttons() {
       { method: "pause" },
       { method: "step" },
       { method: "render" },
-    ] satisfies DataMessage);
+    ] satisfies MessageToWorker);
   }, [worker]);
 
   const handleReset = useCallback(() => {
@@ -151,7 +134,47 @@ function Buttons() {
       { method: "pause" },
       { method: "initializeData" },
       { method: "render" },
-    ] satisfies DataMessage);
+    ] satisfies MessageToWorker);
+  }, [worker]);
+
+  const handleSweep = useCallback(() => {
+    if (timer.current) {
+      clearInterval(timer.current);
+      timer.current = null;
+
+      worker?.postMessage([{
+        method: "pause",
+      }] satisfies MessageToWorker)
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+
+      setStore(p => {
+        p.worker?.postMessage([
+          {
+            property: "beta",
+            value: 1 / 2,
+          }, {
+            method: "play",
+          }
+        ] satisfies MessageToWorker)
+
+        return { ...p, T: 2 }
+      })
+
+      timer.current = setInterval(() => {
+        setStore(p => {
+          const T = Math.round(Math.max(0, Math.min(p.T - 0.01, 2)) * 100) / 100
+          p.worker?.postMessage([{
+            property: "beta",
+            value: 1 / T,
+          }] satisfies MessageToWorker)
+
+          return { ...p, T }
+        })
+      }, 15000);
+
+    }
   }, [worker]);
 
   return (
@@ -159,6 +182,7 @@ function Buttons() {
       <button className={`btn ${isPlaying ? "stop" : "start"}`} onClick={handlePlay}>{isPlaying ? "Stop" : "Start"}</button>
       <button className="btn step" onClick={handleStep}>Step</button>
       <button className="btn reset" onClick={handleReset}>Reset</button>
+      <button className="btn step" onClick={handleSweep}>Sweep</button>
     </div>
   )
 }
