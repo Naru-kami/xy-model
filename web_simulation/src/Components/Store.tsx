@@ -1,6 +1,7 @@
 import createFastContext from "./FastContext";
 
 export type StoreType = {
+  isPlaying: boolean,
   isDark: boolean,
   T: number,
   N: 32 | 64 | 128 | 256 | 512,
@@ -10,6 +11,7 @@ export type StoreType = {
 }
 
 const Store: StoreType = {
+  isPlaying: false,
   isDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
   T: 1,
   N: 32,

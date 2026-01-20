@@ -21,20 +21,13 @@ export default function Canvas() {
       }] satisfies MessageToWorker, [offscreen]);
 
       p.worker.onmessage = (e: MessageEvent<MessageFromWorker>) => {
-        const { magnetization, susceptibility } = e.data;
-        setStore(p => {
-          if (magnetization) {
-            p.magnetization.y = magnetization;
-          }
-          if (susceptibility) {
-            p.susceptibility.y = susceptibility;
-          }
-          return {
-            ...p,
-            magnetization: { ...p.magnetization },
-            susceptibility: { ...p.susceptibility }
-          }
-        })
+        const { data } = e;
+        setStore(o => ({
+          ...o,
+          ...data,
+          magnetization: { ...o.magnetization, ...data.magnetization },
+          susceptibility: { ...o.susceptibility, ...data.susceptibility }
+        }))
       }
 
       return { ...p }

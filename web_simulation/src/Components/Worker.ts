@@ -1,3 +1,5 @@
+import type { StoreType } from "./Store";
+
 type PropertyNames = NonNullable<{
   [K in keyof Data]: Data[K] extends (...args: any) => any ? never : K
 }[keyof Data]>;
@@ -28,12 +30,12 @@ type PropertyMessage = {
   [K in PropertyNames]: { property: K; value: Data[K] }
 }[PropertyNames];
 
+type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer R> ? Array<RecursivePartial<R>> : RecursivePartial<T[P]>
+}
 
 export type MessageToWorker = (CanvasInit | MethodMessage | PropertyMessage)[];
-export type MessageFromWorker = {
-  magnetization?: (number | null)[],
-  susceptibility?: (number | null)[]
-}
+export type MessageFromWorker = RecursivePartial<Omit<StoreType, "worker">>
 
 var CanvasData: Data | undefined;
 
@@ -130,8 +132,8 @@ class Data {
       }
     }
     self.postMessage?.({
-      magnetization: this.#m,
-      susceptibility: this.#chi,
+      magnetization: {y: this.#m},
+      susceptibility: {y: this.#chi},
     } satisfies MessageFromWorker)
   }
 
@@ -151,28 +153,35 @@ class Data {
     this.#rAF = undefined;
 
     self.postMessage?.({
-      magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
-      susceptibility: this.#chi,
+      magnetization: {y: this.#m.map((e, i) => e && e / this.#len[i])},
+      susceptibility: {y: this.#chi},
     } satisfies MessageFromWorker)
   }
 
-  sweep(beta = 2) {
-    if(!beta) {
+  sweep(beta = 0.5, t = 0) {
+    this.beta = beta;
+    if(this.beta > 1e4) {
       self.postMessage?.({
-        magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
-        susceptibility: this.#chi,
+        isPlaying: false,
+        magnetization: {y: this.#m.map((e, i) => e && e / this.#len[i])},
+        susceptibility: {y: this.#chi},
       } satisfies MessageFromWorker)
-      
+
+      this.#rAF && cancelAnimationFrame(this.#rAF);
+      this.#rAF = undefined;
       return
     }
-    this.beta = beta;
+
     this.#rAF = requestAnimationFrame(time => {
-      for(let i = 0; i < 15; i++) {
+      this.beta = time - t > 500 ? 1 / (1 / this.beta - 0.01) : this.beta;
+      t = time - t > 500 ? time : t;
+
+      for(let i = 0; i < 30; i++) {
         this.step()
         this.recordData(time);
       }
       this.render();
-      this.sweep(beta - 0.01);
+      this.sweep(this.beta, t);
     })
   }
 
@@ -188,8 +197,9 @@ class Data {
     if (currentTime - this.#lastCalc > 500) {
       this.#lastCalc = currentTime;
       self.postMessage?.({
-        magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
-        susceptibility: this.#chi,
+        T: Math.round(100/this.beta)/100,
+        magnetization: {y: this.#m.map((e, i) => e && e / this.#len[i])},
+        susceptibility: {y: this.#chi},
       } satisfies MessageFromWorker)
     }
   }

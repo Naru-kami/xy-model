@@ -1,4 +1,4 @@
-import { useCallback, useId, useState } from 'react'
+import { useCallback, useId } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
@@ -104,8 +104,8 @@ function Sliders() {
 }
 
 function Buttons() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [worker, setStore] = useStore(store => store.worker);
+  const [isPlaying, setStore] = useStore(store => store.isPlaying);
+  const [worker] = useStore(store => store.worker);
 
   const handlePlay = useCallback(() => {
     isPlaying ? worker?.postMessage([{
@@ -114,11 +114,11 @@ function Buttons() {
       method: "play",
     }] satisfies MessageToWorker);
 
-    setIsPlaying(p => !p);
+    setStore(p => ({...p, isPlaying: !p.isPlaying}));
   }, [worker, isPlaying]);
 
   const handleStep = useCallback(() => {
-    setIsPlaying(false)
+    setStore(p => ({...p, isPlaying: false}));
     worker?.postMessage([
       { method: "pause" },
       { method: "step" },
@@ -127,7 +127,7 @@ function Buttons() {
   }, [worker]);
 
   const handleReset = useCallback(() => {
-    setIsPlaying(false);
+    setStore(p => ({...p, isPlaying: false}));
     worker?.postMessage([
       { method: "pause" },
       { method: "initializeData" },
@@ -140,9 +140,9 @@ function Buttons() {
       worker?.postMessage([{
         method: "pause",
       }] satisfies MessageToWorker)
-      setIsPlaying(false);
+      setStore(p => ({...p, isPlaying: false}));
     } else {
-      setIsPlaying(true);
+      setStore(p => ({...p, isPlaying: true}));
 
       setStore(p => {
         p.worker?.postMessage([
