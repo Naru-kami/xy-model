@@ -22,7 +22,8 @@ body {
 
 .controls {
   display: grid;
-  gap: 1rem;
+  gap: 0.5rem;
+  padding-block: 0.5rem; 
   grid-template-columns: auto auto;
   justify-content: start;
   background: #AAA1;
@@ -38,8 +39,6 @@ body {
 
 .input-wrapper {
   display: grid;
-  gap: 0.5rem;
-  align-content: end;
 }
 
 .btn-group {
@@ -98,6 +97,10 @@ body {
   background-color: #982929;
 }
 
+.step-method {
+  justify-self: stretch;
+}
+
 .app {
   display: grid;
   gap: 1rem;
@@ -118,16 +121,22 @@ canvas {
   display: block !important;
 }
 
-.color-wheel{
-  grid-row: 1 / span 2;
+.color-wheel {
+  grid-row: 1 / span 3;
   width: 150px;
   height: 150px;
-  border-radius: 100vmax;
-  background: conic-gradient(in hsl longer hue from 90deg, red, red);
-  padding: 0.5rem;
   margin: 2rem;
-  background-clip: content-box;
   position: relative;
+
+  & > .gradient-wheel {
+    position: absolute;
+    inset: 0;
+    padding: 0.5rem;
+    transform: scaleY(-1);
+    border-radius: 100vmax;
+    background: conic-gradient(in hsl longer hue from 90deg, red, red);
+    background-clip: content-box;
+  }
 
   & > span {
     position: absolute;

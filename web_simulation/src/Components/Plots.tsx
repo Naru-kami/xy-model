@@ -23,7 +23,7 @@ const getLayout = ({ isDark = true, ...restProps }: { isDark: boolean } & Partia
   plot_bgcolor: isDark ? "#2c2c34" : "#f9f9f9",
   paper_bgcolor: isDark ? "#2c2c34" : "#f9f9f9",
   width: 650,
-  height: 370,
+  height: 380,
   title: { font: { color: isDark ? "#d4d4d6" : "#323232" }, ...(!restProps.title || typeof restProps.title === "string" ? {} : restProps.title) },
   modebar: { bgcolor: "#0000", color: isDark ? "#FFF6" : "#0006", activecolor: isDark ? "#d4d4d6" : "#323232" }
 } satisfies Partial<Plotly.Layout>);

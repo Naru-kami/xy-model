@@ -108,6 +108,10 @@ class Data {
     this.step = this.Metropolis;
   }
 
+  setStep(method: "Metropolis" | "SwendsenWang" | "Wolff") {
+    this.step = this[method];
+  }
+
   resize(width: number, height: number) {
     this.#canvas.width = width;
     this.#canvas.height = height;
@@ -132,8 +136,8 @@ class Data {
       }
     }
     self.postMessage?.({
-      magnetization: {y: this.#m},
-      susceptibility: {y: this.#chi},
+      magnetization: { y: this.#m },
+      susceptibility: { y: this.#chi },
     } satisfies MessageFromWorker)
   }
 
@@ -153,18 +157,18 @@ class Data {
     this.#rAF = undefined;
 
     self.postMessage?.({
-      magnetization: {y: this.#m.map((e, i) => e && e / this.#len[i])},
-      susceptibility: {y: this.#chi},
+      magnetization: { y: this.#m.map((e, i) => e && e / this.#len[i]) },
+      susceptibility: { y: this.#chi },
     } satisfies MessageFromWorker)
   }
 
   sweep(beta = 0.5, t = 0) {
     this.beta = beta;
-    if(this.beta > 1e4) {
+    if (this.beta > 1e4) {
       self.postMessage?.({
         isPlaying: false,
-        magnetization: {y: this.#m.map((e, i) => e && e / this.#len[i])},
-        susceptibility: {y: this.#chi},
+        magnetization: { y: this.#m.map((e, i) => e && e / this.#len[i]) },
+        susceptibility: { y: this.#chi },
       } satisfies MessageFromWorker)
 
       this.#rAF && cancelAnimationFrame(this.#rAF);
@@ -173,10 +177,10 @@ class Data {
     }
 
     this.#rAF = requestAnimationFrame(time => {
-      this.beta = time - t > 500 ? 1 / (1 / this.beta - 0.01) : this.beta;
+      this.beta = time - t > 500 ? 1 / Math.max(0, Math.min(1 / this.beta - 0.01, 2)) : this.beta;
       t = time - t > 500 ? time : t;
 
-      for(let i = 0; i < 30; i++) {
+      for (let i = 0; i < 30; i++) {
         this.step()
         this.recordData(time);
       }
@@ -197,9 +201,9 @@ class Data {
     if (currentTime - this.#lastCalc > 500) {
       this.#lastCalc = currentTime;
       self.postMessage?.({
-        T: Math.round(100/this.beta)/100,
-        magnetization: {y: this.#m.map((e, i) => e && e / this.#len[i])},
-        susceptibility: {y: this.#chi},
+        T: Math.round(100 / this.beta) / 100,
+        magnetization: { y: this.#m.map((e, i) => e && e / this.#len[i]) },
+        susceptibility: { y: this.#chi },
       } satisfies MessageFromWorker)
     }
   }
@@ -248,7 +252,43 @@ class Data {
   }
 
   Wolff() {
+    const width = this.#pixelData.width;
+    const height = this.#pixelData.height;
 
+    const r = Math.random() * 2 * Math.PI;
+    const px = Math.floor(Math.random() * width);
+    const py = Math.floor(Math.random() * height);
+
+    const stack = new Set<number>([py * width + px]);
+    const cluster = new Set<number>();
+
+    let neighbors: number[], x: number, y: number;
+
+    for (const s of stack.values()) {
+      this.#spins[s] = (2 * r - this.#spins[s] + 3 * Math.PI) % (2 * Math.PI);
+      x = s % width;
+      y = Math.floor(s / width);
+
+      neighbors = [
+        ((y - 1 + height) % height) * width + x,  // top
+        y * width + ((x + 1) % width),            // right
+        ((y + 1) % height) * width + x,           // bottom
+        y * width + ((x - 1 + width) % width),    // left
+      ]
+
+      for (const neighbor of neighbors) {
+        if (
+          !cluster.has(neighbor) &&
+          !stack.has(neighbor) &&
+          (Math.random() < 1 - Math.exp(Math.min(0, 2 * this.beta * Math.cos(r - this.#spins[s]) * Math.cos(r - this.#spins[neighbor]))))
+        ) {
+          stack.add(neighbor);
+        }
+      }
+
+      stack.delete(s)
+      cluster.add(s);
+    }
   }
 
   render() {

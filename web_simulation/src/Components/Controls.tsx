@@ -1,4 +1,4 @@
-import { useCallback, useId } from 'react'
+import React, { useCallback, useId, useState } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
@@ -114,11 +114,11 @@ function Buttons() {
       method: "play",
     }] satisfies MessageToWorker);
 
-    setStore(p => ({...p, isPlaying: !p.isPlaying}));
+    setStore(p => ({ ...p, isPlaying: !p.isPlaying }));
   }, [worker, isPlaying]);
 
   const handleStep = useCallback(() => {
-    setStore(p => ({...p, isPlaying: false}));
+    setStore(p => ({ ...p, isPlaying: false }));
     worker?.postMessage([
       { method: "pause" },
       { method: "step" },
@@ -127,7 +127,7 @@ function Buttons() {
   }, [worker]);
 
   const handleReset = useCallback(() => {
-    setStore(p => ({...p, isPlaying: false}));
+    setStore(p => ({ ...p, isPlaying: false }));
     worker?.postMessage([
       { method: "pause" },
       { method: "initializeData" },
@@ -140,13 +140,14 @@ function Buttons() {
       worker?.postMessage([{
         method: "pause",
       }] satisfies MessageToWorker)
-      setStore(p => ({...p, isPlaying: false}));
+      setStore(p => ({ ...p, isPlaying: false }));
     } else {
-      setStore(p => ({...p, isPlaying: true}));
+      setStore(p => ({ ...p, isPlaying: true }));
 
       setStore(p => {
         p.worker?.postMessage([
           { method: "pause" },
+          { method: "initializeData" },
           { method: "sweep" }
         ] satisfies MessageToWorker)
 
@@ -165,11 +166,35 @@ function Buttons() {
   )
 }
 
+type MCMethods = "Metropolis" | "SwendsenWang" | "Wolff";
+
+function MethodSelect() {
+  const [worker] = useStore(store => store.worker)
+  const [method, setMethod] = useState<MCMethods>("Metropolis");
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    if ("Metropolis" === e.target.value || "SwendsenWang" === e.target.value || "Wolff" === e.target.value) {
+      setMethod(e.target.value);
+      worker?.postMessage([{
+        method: "setStep",
+        parameters: [e.target.value]
+      }] satisfies MessageToWorker);
+    }
+  }, [worker]);
+
+  return <select className="step-method" value={method} onChange={handleChange}>
+    <option value="Metropolis">Metropolis Algorithm</option>
+    <option value="SwendsenWang">SwendsenWang Algorithm</option>
+    <option value="Wolff">Wolff Algorithm</option>
+  </select>
+}
+
 export default function Controls() {
   return (
     <div className='controls'>
       <Colorwheel />
       <Sliders />
+      <MethodSelect />
       <Buttons />
     </div>
   )
