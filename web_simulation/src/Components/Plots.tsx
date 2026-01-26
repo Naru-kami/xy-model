@@ -56,8 +56,7 @@ function AverageObs() {
   }), [isDark, obs_label]);
 
   return (
-    // @ts-expect-error
-    <Plot.default
+    <Plot
       data={[trace]}
       config={config}
       layout={layout}
@@ -83,8 +82,7 @@ function VarianceObs() {
   }), [isDark, obs_label]);
 
   return (
-    // @ts-expect-error
-    <Plot.default
+    <Plot
       data={[trace]}
       config={config}
       layout={layout}
