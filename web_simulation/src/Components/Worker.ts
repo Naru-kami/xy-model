@@ -354,7 +354,6 @@ class Data {
     const width = this.#pixelData.width;
     const height = this.#pixelData.height;
 
-    const r = Math.random() * 2 * Math.PI;
     const stack = new Set<number>();
     const cluster = new Set<number>();
 
@@ -363,6 +362,7 @@ class Data {
       x: number, y: number;
 
     do {
+      let r = Math.random() * 2 * Math.PI;
       cluster.clear();
       stack.clear();
       stack.add(Math.floor(Math.random() * height) * width + Math.floor(Math.random() * width))
@@ -392,7 +392,7 @@ class Data {
       }
       i++;
       flippedSpins += cluster.size;
-      // Try to flip ~width*height spin in total.
+      // Attempt to flip Nx*Ny spin in total.
       // If next cluster would exceed it, exit.
     } while (flippedSpins * (1 + 1 / i) < this.#spins.length);
   }

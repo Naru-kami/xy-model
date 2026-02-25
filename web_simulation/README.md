@@ -6,3 +6,5 @@ cd ./web_simulation/
 npm install
 npm start
 ```
+
+Live version accessible at: [naru-kami.github.io/xy-model](https://naru-kami.github.io/xy-model/)
