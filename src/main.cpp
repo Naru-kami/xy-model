@@ -12,6 +12,7 @@ class XYModel {
 private:
   std::mt19937 rng;
   std::uniform_real_distribution<double> rand;
+  std::uniform_real_distribution<double> randPI;
   int Nx;
   int Ny;
 
@@ -26,11 +27,12 @@ public:
     std::random_device seed;
     rng = std::mt19937(seed());
     rand = std::uniform_real_distribution(0.0, 1.0);
+    randPI = std::uniform_real_distribution(0.0, 2 * M_PI);
   }
 
 private:
   double random() { return rand(rng); }
-  double randomAngle() { return random() * 2 * M_PI; }
+  double randomAngle() { return randPI(rng); }
 
 public:
   void resize(int Nx, int Ny) {
@@ -140,75 +142,127 @@ public:
 
       i++;
       flippedSpins += clusterSize;
-      // Attempt to flip Nx*Ny spin in total.
+      // Attempt to flip Nx*Ny spin in total, in order 
+      // to compare to Metropolis, which flips Nx*Ny spins.
       // If next cluster would exceed it, exit.
     } while (flippedSpins * (1. + 1./i) < Nx*Ny);
   }
 };
 
 
-void printVector(std::vector<double> vec) {
-  std::cout << "[ ";
-  for (const double& i: vec) {
-    std::cout << i << "  ";
-  }
-  std::cout << "]" << std::endl;
-}
-
-
 int main() {
-  const int N = 32;
-  XYModel xy(N, N);
+  H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
 
   const int N_BURN = 256;
-  const int N_STEPS = 1024;
-  const int N_T = 201;
+  const int N_STEPS = 256;
+  const int N_T = 100;        // Number of points on the temperature grid.
+  const int REPETITIONS = 20; // to calculate mean and std.
 
-  // Actual data used to plot
-  auto E = std::vector(N_T, 0.0);
-  auto M = std::vector(N_T, 0.0);
-  auto C = std::vector(N_T, 0.0);
-  auto X = std::vector(N_T, 0.0);
-  auto T = std::vector(N_T, 0.0);
-  std::generate(T.begin(), T.end(), [n=0, &N_T]() mutable { return 2.0 * n++ / (N_T - 1); });
-  
   double _e, _m; // just placeholders, not really important
-
-  for (int i = 0; i < N_T; i++) {
-    xy.initializeData(true);
-    xy.T = T[i];
-    double e=0, m=0, e2=0, m2=0;
-
-    for (int i = 0; i < N_BURN; i++) xy.Metropolis();
   
-    for (int i = 0; i < N_STEPS; i++) {
-      xy.Wolff();
-  
-      _e = xy.Energy();
-      _m = xy.Magnetization();
-  
-      e += _e;
-      m += _m;
-      e2 += _e * _e;
-      m2 += _m * _m;
-    }
-    E[i] = e / N_STEPS;
-    M[i] = m / N_STEPS;
-    C[i] = (e2 / N_STEPS - e*e/N_STEPS/N_STEPS) * N*N / T[i]/T[i];
-    X[i] = (m2 / N_STEPS - m*m/N_STEPS/N_STEPS) * N*N / T[i];
 
-    if ((i-1)%2) {
-      std::cout << "\rProgress: " << (100.0 * i/(N_T-1)) << "%" << std::flush;
+  XYModel xy(1, 1);
+  
+  // Setting temperature grid points
+  std::vector T(N_T, 0.0);
+  std::generate(T.begin(), T.end(), [&N_T, n=N_T]() mutable { return 2.0 * n-- / N_T; });
+  std::vector gridSizes({256, 128, 64, 32, 16, 8});
+  output.createDataSet("/T", T);
+  output.createDataSet("/gridSizes", gridSizes);
+    
+  // Actual data used to plot
+  // Observable holds data for grid size, temperature, and repetitions (mean +/- std.)
+  std::vector E(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+  std::vector M(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+  std::vector C(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+  std::vector X(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+
+
+  // Wolff Algorithm here. Takes about ~4h
+  for (int n = 0; n < gridSizes.size(); n++) {
+    int N = gridSizes[n];
+    xy.resize(N, N);
+    
+    for (int rep = 0; rep < REPETITIONS; rep++) {
+      xy.initializeData();
+
+      for (int i = 0; i < N_T; i++) {
+        xy.T = T[i];
+        double e=0, m=0, e2=0, m2=0;
+    
+        for (int i = 0; i < N_BURN; i++) xy.Wolff();
+      
+        for (int i = 0; i < N_STEPS; i++) {
+          xy.Wolff();
+      
+          _e = xy.Energy();
+          _m = xy.Magnetization();
+      
+          e += _e / N_STEPS;
+          m += _m / N_STEPS;
+          e2 += _e * _e / N_STEPS;
+          m2 += _m * _m / N_STEPS;
+        }
+        E[n][i][rep] = e;
+        M[n][i][rep] = m;
+        C[n][i][rep] = (e2 - e*e) * N*N / T[i]/T[i];
+        X[n][i][rep] = (m2 - m*m) * N*N / T[i];
+    
+        std::cout << "\rProgress: Wolff, N=" << N << " - " << (100.0 * (rep*N_T + i + 1)/(REPETITIONS*N_T)) << "%   " << std::flush;
+      }
     }
   }
 
-  H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
-  output.createDataSet("/" + std::to_string(N) + "/T", T);
-  output.createDataSet("/" + std::to_string(N) + "/E", E);
-  output.createDataSet("/" + std::to_string(N) + "/M", M);
-  output.createDataSet("/" + std::to_string(N) + "/C", C);
-  output.createDataSet("/" + std::to_string(N) + "/X", X);
+  output.createDataSet("/Wolff/E", E);
+  output.createDataSet("/Wolff/M", M);
+  output.createDataSet("/Wolff/C", C);
+  output.createDataSet("/Wolff/X", X);
 
+
+  // Use Metropolis now. Takes about ~4h
+  E = std::vector(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+  M = std::vector(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+  C = std::vector(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+  X = std::vector(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
+
+  for (int n = 0; n < gridSizes.size(); n++) {
+    int N = gridSizes[n];
+    xy.resize(N, N);
+    
+    for (int rep = 0; rep < REPETITIONS; rep++) {
+      xy.initializeData();
+      
+      for (int i = 0; i < N_T; i++) {
+        xy.T = T[i];
+        double e=0, m=0, e2=0, m2=0;
+    
+        for (int i = 0; i < N_BURN; i++) xy.Metropolis();
+      
+        for (int i = 0; i < N_STEPS; i++) {
+          xy.Metropolis();
+      
+          _e = xy.Energy();
+          _m = xy.Magnetization();
+      
+          e += _e / N_STEPS;
+          m += _m / N_STEPS;
+          e2 += _e * _e / N_STEPS;
+          m2 += _m * _m / N_STEPS;
+        }
+        E[n][i][rep] = e;
+        M[n][i][rep] = m;
+        C[n][i][rep] = (e2 - e*e) * N*N / T[i]/T[i];
+        X[n][i][rep] = (m2 - m*m) * N*N / T[i];
+    
+        std::cout << "\rProgress: Metropolis, N=" << N << " - " << (100.0 * (rep*N_T + i + 1)/(REPETITIONS*N_T)) << "%   " << std::flush;
+      }
+    }
+  }
+
+  output.createDataSet("/Metropolis/E", E);
+  output.createDataSet("/Metropolis/M", M);
+  output.createDataSet("/Metropolis/C", C);
+  output.createDataSet("/Metropolis/X", X);
 
   return 0;
 }
