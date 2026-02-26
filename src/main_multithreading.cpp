@@ -6,19 +6,29 @@
 #include <string>
 #include <thread> 
 
+
+std::vector<double> linspace(double a, double b, int steps) {
+  std::vector<double> result(steps, 0.0);
+  double step = (b - a) / (steps - 1);
+  for (int i = 0; i < steps; i++) {
+    result[i] = a + i * step;
+  }
+  return result;
+}
+
+
 int main() {
     std::cout << "CPU-Cores: " << std::thread::hardware_concurrency() << std::endl;
 
-    H5Easy::File output("../src/data/data.hdf5", H5Easy::File::Overwrite);
+    H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
 
     const int N_BURN = 512;
     const int N_STEPS = 512;
     const int N_T = 100;
     const int REPETITIONS = 20;
-    const int THREADS_PER_GRID = 8;  // ← 8 Kerne pro Gitter!
+    // const int THREADS_PER_GRID = 8;  // ← 8 Kerne pro Gitter!
 
-    std::vector<double> T(N_T, 0.0);
-    std::generate(T.begin(), T.end(), [n = N_T, N_T]() mutable { return 2.0 * n-- / N_T; });
+    std::vector<double> T = linspace(0.02, 2, N_T);
     std::vector<int> gridSizes = {256, 128, 64, 32, 16, 8};
     
     output.createDataSet("/T", T);
@@ -27,34 +37,40 @@ int main() {
     std::mutex dataMutex;
 
     // Data: [grid][rep][temp]
-    auto E = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
-    auto M = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
-    auto C = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
-    auto X = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
+    std::vector E(gridSizes.size(), std::vector(REPETITIONS, std::vector(N_T, 0.0)));
+    std::vector M(gridSizes.size(), std::vector(REPETITIONS, std::vector(N_T, 0.0)));
+    std::vector C(gridSizes.size(), std::vector(REPETITIONS, std::vector(N_T, 0.0)));
+    std::vector X(gridSizes.size(), std::vector(REPETITIONS, std::vector(N_T, 0.0)));
 
     auto runGrid = [&](const std::string& algoName, int grid_idx, int N) {
-        std::cout << "\n=== " << algoName << " N=" << N << " (" << grid_idx+1 << "/6) ===" << std::endl;
+        std::cout << "\n=== " << algoName << " N=" << N << " (" << grid_idx+1 << "/" << gridSizes.size() <<") ===" << std::endl;
         
         std::vector<std::future<void>> futures;
-        
+
         // 20 Reps parallel auf 8 Threads verteilen
         for (int rep = 0; rep < REPETITIONS; rep++) {
             futures.push_back(std::async(std::launch::async, [&](int rep) {
                 XYModel xy(N, N);
-                xy.initializeData();
+                std::function<void()> algo;
+                if (algoName == "Wolff")
+                    algo = [&xy]() { xy.Wolff(); };
+                else
+                    algo = [&xy]() { xy.Metropolis(); };
                 
+
                 for (int t = 0; t < N_T; t++) {
                     xy.T = T[t];
+                    xy.initializeData(true);
                     
                     // Burn-in
                     for (int i = 0; i < N_BURN; i++) {
-                        (algoName == "Wolff") ? xy.Wolff() : xy.Metropolis();
+                        algo();
                     }
                     
                     // Sampling
                     double e = 0, m = 0, e2 = 0, m2 = 0;
                     for (int i = 0; i < N_STEPS; i++) {
-                        (algoName == "Wolff") ? xy.Wolff() : xy.Metropolis();
+                        algo();
                         double _e = xy.Energy();
                         double _m = xy.Magnetization();
                         e += _e / N_STEPS;
@@ -74,7 +90,7 @@ int main() {
                     
                     std::cout << "\r" << algoName << " N=" << N << " rep=" << rep+1 
                               << "/" << REPETITIONS << " T=" << t+1 << "/" << N_T 
-                              << "  " << std::flush;
+                              << "                                  " << std::flush;
                 }
             }, rep));
         }
@@ -89,6 +105,20 @@ int main() {
     for (int n = 0; n < gridSizes.size(); n++) {
         runGrid("Wolff", n, gridSizes[n]);
     }
+
+    // Speichern
+    {
+        std::lock_guard<std::mutex> lock(dataMutex);
+        output.createDataSet("/Wolff/E", E);
+        output.createDataSet("/Wolff/M", M);
+        output.createDataSet("/Wolff/C", C);
+        output.createDataSet("/Wolff/X", X);
+    }
+
+    E = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
+    M = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
+    C = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
+    X = std::vector(gridSizes.size(), std::vector(REPETITIONS, std::vector<double>(N_T, 0.0)));
     
     std::cout << "\n=== METROPOLIS ===" << std::endl;
     for (int n = 0; n < gridSizes.size(); n++) {
@@ -98,10 +128,6 @@ int main() {
     // Speichern
     {
         std::lock_guard<std::mutex> lock(dataMutex);
-        output.createDataSet("/Wolff/E", E);
-        output.createDataSet("/Wolff/M", M);
-        output.createDataSet("/Wolff/C", C);
-        output.createDataSet("/Wolff/X", X);
         output.createDataSet("/Metropolis/E", E);
         output.createDataSet("/Metropolis/M", M);
         output.createDataSet("/Metropolis/C", C);

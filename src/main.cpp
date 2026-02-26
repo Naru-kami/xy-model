@@ -7,6 +7,14 @@
 #include <algorithm>
 #include <string>
 
+std::vector<double> linspace(double a, double b, int steps) {
+  std::vector<double> result(steps, 0.0);
+  double step = (b - a) / (steps - 1);
+  for (int i = 0; i < steps; i++) {
+    result[i] = a + i * step;
+  }
+  return result;
+}
 
 class XYModel {
 private:
@@ -36,7 +44,7 @@ private:
 
 public:
   void resize(int Nx, int Ny) {
-    this->Nx = Ny;
+    this->Nx = Nx;
     this->Ny = Ny;
 
     spins.resize(Nx * Ny);
@@ -149,12 +157,12 @@ public:
   }
 };
 
+void generateData() {
 
-int main() {
-  H5Easy::File output("../src/data/data.hdf5", H5Easy::File::Overwrite);
+  H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
 
-  const int N_BURN = 256;
-  const int N_STEPS = 256;
+  const int N_BURN = 512;
+  const int N_STEPS = 512;
   const int N_T = 100;        // Number of points on the temperature grid.
   const int REPETITIONS = 20; // to calculate mean and std.
 
@@ -164,9 +172,8 @@ int main() {
   XYModel xy(1, 1);
   
   // Setting temperature grid points
-  std::vector T(N_T, 0.0);
-  std::generate(T.begin(), T.end(), [&N_T, n=N_T]() mutable { return 2.0 * n-- / N_T; });
-  std::vector gridSizes({256, 128, 64, 32, 16, 8});
+  auto T = linspace(0.02, 2, N_T);
+  std::vector<int> gridSizes({32, 16, 8});
   output.createDataSet("/T", T);
   output.createDataSet("/gridSizes", gridSizes);
     
@@ -263,6 +270,74 @@ int main() {
   output.createDataSet("/Metropolis/M", M);
   output.createDataSet("/Metropolis/C", C);
   output.createDataSet("/Metropolis/X", X);
+};
+
+void generateAutoCorrelationData() {
+  H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::Overwrite);
+
+  const int N_BURN = 4096;
+  const int N_MEAS = 4096;
+  std::vector<double> gridSizes({64});
+  auto T = linspace(0.02, 2, 100);
+
+  std::vector<double> M(N_MEAS, 0.0);
+  std::vector<double> C(T.size(), 0.0);
+
+  XYModel xy(1, 1);
+
+  for (int i = 0; i < gridSizes.size(); i++) {
+    int N = gridSizes[i];
+    xy.resize(N, N);
+
+    for (int j = 0; j < T.size(); j++)  {
+      xy.T = T[j];
+      xy.initializeData();
+
+      // configuration needs to be in equilibrium
+      for (int k = 0; k < N_BURN; k++) xy.Wolff();
+
+      double mean_m = 0.0;
+      for (int k = 0; k < N_MEAS; k++) {
+        xy.Wolff();
+        M[k] = xy.Magnetization();
+        mean_m += M[k] / N_MEAS;
+      }
+
+      // auto correlation function
+      double CX0 = 1.0;
+      auto gamma = [&M, &CX0, &mean_m](int t) {
+        double CXT = 0;
+        for (int k = 0; k <= M.size() - t - 1; k++) {
+          CXT += (M[k] - mean_m) * (M[k + t] - mean_m);
+        }
+        CXT /= M.size() - t;
+
+        return CXT / CX0;
+      };
+      CX0 = gamma(0);
+
+      // integrated auto correlation time
+      double g;
+      C[j] = 1./2.;
+      for(int k = 1; k < M.size() - 1; k++) {
+        g = gamma(k);
+        if (g < 0) break;
+
+        C[j] += g;
+      }
+
+      std::cout << "\rProgress: " << (100.0 * (i*T.size() + j + 1)/(gridSizes.size()*T.size())) << "%   " << std::flush;
+    }
+  }
+  output.createDataSet("/T", T);
+  output.createDataSet("/Metropolis/C", C);
+  
+}
+
+int main() {
+
+  // generateAutoCorrelationData();
+  generateData();
 
   return 0;
 }

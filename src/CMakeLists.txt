@@ -17,8 +17,8 @@ FetchContent_MakeAvailable(HighFive)
 find_package(Threads REQUIRED)
 
 # NUR DIESE 2!
-add_executable(xy_serial src/main.cpp)
+add_executable(xy_serial main.cpp)
 target_link_libraries(xy_serial PRIVATE Threads::Threads HighFive::HighFive)
 
-add_executable(xy_parallel src/main_multithreading.cpp)
+add_executable(xy_parallel main_multithreading.cpp)
 target_link_libraries(xy_parallel PRIVATE Threads::Threads HighFive::HighFive)
