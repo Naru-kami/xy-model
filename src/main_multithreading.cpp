@@ -8,8 +8,8 @@
 int main() {
     H5Easy::File output("../src/data/data.hdf5", H5Easy::File::Overwrite);
 
-    const int N_BURN = 256;
-    const int N_STEPS = 256;
+    const int N_BURN = 512;
+    const int N_STEPS = 512;
     const int N_T = 100;
     const int REPETITIONS = 20;
 
