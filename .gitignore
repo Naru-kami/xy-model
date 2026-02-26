@@ -10,3 +10,15 @@ src/build/
 *.synctex.gz
 *.dvi
 *.out
+
+
+
+
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

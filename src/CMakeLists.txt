@@ -1,19 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
 project(xy-model)
 
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 include(FetchContent)
-FetchContent_Declare( HighFive
-  GIT_REPOSITORY https://github.com/highfive-devs/HighFive.git
-  GIT_TAG main
-  GIT_SHALLOW TRUE)
+FetchContent_Declare(
+  HighFive
+  GIT_REPOSITORY https://github.com/highfive-devs/highfive.git
+  GIT_TAG        v3.1.1   
+  GIT_SHALLOW    TRUE
+)
 FetchContent_MakeAvailable(HighFive)
 
+find_package(Threads REQUIRED)
 
-add_executable(xy-model main.cpp)
-target_link_libraries(xy-model PRIVATE HighFive)
+# NUR DIESE 2!
+add_executable(xy_serial main.cpp)
+target_link_libraries(xy_serial PRIVATE Threads::Threads HighFive::HighFive)
+
+add_executable(xy_parallel main_multithreading.cpp)
+target_link_libraries(xy_parallel PRIVATE Threads::Threads HighFive::HighFive)

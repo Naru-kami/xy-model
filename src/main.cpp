@@ -16,15 +16,6 @@ std::vector<double> linspace(double a, double b, int steps) {
   return result;
 }
 
-void printVector(std::vector<double> vec) {
-  for (const auto& v: vec) {
-    std::cout << v << " ";
-  }
-  std::cout << std::endl;
-}
-
-
-
 class XYModel {
 private:
   std::mt19937 rng;
@@ -170,8 +161,8 @@ void generateData() {
 
   H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
 
-  const int N_BURN = 256;
-  const int N_STEPS = 256;
+  const int N_BURN = 512;
+  const int N_STEPS = 512;
   const int N_T = 100;        // Number of points on the temperature grid.
   const int REPETITIONS = 20; // to calculate mean and std.
 
@@ -182,7 +173,7 @@ void generateData() {
   
   // Setting temperature grid points
   auto T = linspace(0.02, 2, N_T);
-  std::vector<int> gridSizes({256, 128, 64, 32, 16, 8});
+  std::vector<int> gridSizes({32, 16, 8});
   output.createDataSet("/T", T);
   output.createDataSet("/gridSizes", gridSizes);
     
@@ -284,9 +275,9 @@ void generateData() {
 void generateAutoCorrelationData() {
   H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::Overwrite);
 
-  const int N_BURN = 4096 / 4;
-  const int N_MEAS = 4096 / 4;
-  std::vector<double> gridSizes({128});
+  const int N_BURN = 4096;
+  const int N_MEAS = 4096;
+  std::vector<double> gridSizes({64});
   auto T = linspace(0.02, 2, 100);
 
   std::vector<double> M(N_MEAS, 0.0);
@@ -327,14 +318,14 @@ void generateAutoCorrelationData() {
 
       // integrated auto correlation time
       double g;
-      C[j] = 1;
+      C[j] = 1./2.;
       for(int k = 1; k < M.size() - 1; k++) {
         g = gamma(k);
         if (g < 0) break;
 
         C[j] += g;
       }
-      C[j] /= 2;
+
       std::cout << "\rProgress: " << (100.0 * (i*T.size() + j + 1)/(gridSizes.size()*T.size())) << "%   " << std::flush;
     }
   }
@@ -345,8 +336,8 @@ void generateAutoCorrelationData() {
 
 int main() {
 
-  generateAutoCorrelationData();
-
+  // generateAutoCorrelationData();
+  generateData();
 
   return 0;
 }
