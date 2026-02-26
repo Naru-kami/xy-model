@@ -1,0 +1,23 @@
+\section{Theoretical Basis}
+The theoretical basis of the XY model and the Kosterlitz-Thouless transition is rooted in the study of phase transitions and critical phenomena in two-dimensional systems. The XY model is a classical spin model that describes a system of spins on a two-dimensional lattice, where each spin can take any direction in the plane. The Hamiltonian of the XY model is given by:
+\begin{equation}
+H = -J \sum_{\langle i,j \rangle} \cos(\theta_i - \theta_j)
+\end{equation}
+where $J$ is the coupling constant, $\langle i,j \rangle$ denotes nearest-neighbor pairs of spins, and $\theta_i$ is the angle of the spin at site $i$. The Kosterlitz-Thouless transition is a topological phase transition that occurs in the XY model at a critical temperature $T_c$. Below $T_c$, the system exhibits quasi-long-range order, characterized by a power-law decay of correlations, while above $T_c$,the system is in a disordered phase with exponential decay of correlations.
+\subsection{Markov Chain Monte Carlo Simulation}
+In order to give an overview of the methods used to simulate the XY model, we will briefly discuss the two main algorithms: the Metropolis algorithm and the Wolff cluster algorithm. Both algorithms are based on the principle of Markov Chain Monte Carlo (MCMC) simulation, which allows us to sample configurations of the system according to their Boltzmann weight. The MCMC works by generating a sequence of configurations, where each configuration is generated from the previous one by applying a stochastic update rule. The Metropolis algorithm updates the spins one at a time, while the Wolff cluster algorithm updates clusters of spins simultaneously, which can lead to faster convergence and reduced autocorrelation times, especially near critical points. In our simulations, we will compare the results obtained from both algorithms and discuss their advantages and disadvantages in the context of simulating the XY model.
+\subsection{Metropolis algorithm}
+Based on the MCMC method, the Metropolis algorithm is a widely used technique for simulating statistical systems. In the context of the XY model, the Metropolis algorithm works as follows:
+\begin{enumerate}
+    \item Initialize the system with a random configuration of spins.
+    \item For each Monte Carlo step, select a spin at random and propose a new angle for that spin by adding $\Delta \theta \sim U[0, 2\pi]$
+    \item Calculate the change in energy $\Delta E$ resulting from the proposed update.
+    \item Accept the proposed update with a probability given by the Metropolis criterion:
+    \begin{equation}
+        P_{\text{accept}} = \min\left(1, e^{-\Delta E / k_B T}\right)
+    \end{equation}
+    \item If the update is accepted, update the configuration; otherwise, keep the current configuration.
+    \item Repeat the process for a large number of Monte Carlo steps to ensure convergence to equilibrium.
+\end{enumerate}
+\subsection{Wolff algorithm }
+\subsection{Finite Size Scaling}

@@ -151,7 +151,7 @@ public:
 
 
 int main() {
-  H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
+  H5Easy::File output("../src/data/data.hdf5", H5Easy::File::Overwrite);
 
   const int N_BURN = 256;
   const int N_STEPS = 256;

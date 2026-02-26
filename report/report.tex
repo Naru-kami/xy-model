@@ -20,6 +20,8 @@ nofootinbib,
 %floatfix,
 ]{revtex4-2}
 
+
+
 \usepackage{lipsum} % dummy text
 
 \usepackage{graphicx}% Include figure files
@@ -36,6 +38,9 @@ nofootinbib,
 %%total={6.5in,8.75in}, top=1.2in, left=0.9in, includefoot,
 %%height=10in,a5paper,hmargin={3cm,0.8in},
 %]{geometry}
+\bibliographystyle{apsrev4-2} % must be before \begin{document} in REVTeX [page:0]
+
+
 
 \begin{document}
 
@@ -72,48 +77,27 @@ use the optional argument of the \verb+\item+ command to give the category of ea
 
 
 %------------------------------ Introduction ------------------------------
-\section{Introduction}
-\lipsum[1-2]
-
-%------------------------------ A -----------------------------------------
-\subsection{Section A}
-\lipsum[3]
-
-%------------------------------ B -----------------------------------------
-\subsection{Section B}
-\lipsum[4]
-
-%------------------------------ Theoretical Basis -------------------------
-\section{Theoretical Basis}
-\lipsum[5-6]
-
+\input{Indroduction.tex}
+%------------------------------ Theoretical Basis -----------------------------------------
+\input{theoretical_basis.tex}
 %------------------------------ Methods -----------------------------------
-\section{Methods}
-\lipsum[7-8]
+\input{Methods}
+
 
 %------------------------------ Results -----------------------------------
-\section{Results}
-\lipsum[9]\\
-\begin{figure}[htb]
-\includegraphics[width=.48\textwidth]{../figs/test.png}
-\caption{\label{fig:circle}Circle yep}
-\end{figure}
-\lipsum[10]
+\input{Results.tex}
 
 %------------------------------ Discussion --------------------------------
-\section{Discussion}
-\lipsum[11]
+\input{Discussion.tex}
+
 
 %------------------------------ Summary -----------------------------------
-\section{Summary}
-\lipsum[12]
+\input{Summary.tex}
 
 
 %------------------------------ Appendix ----------------------------------
-\appendix
-\section{Appendix}
-\lipsum[13]
+\input{appendix.tex}
 
+\bibliography{literatur} % looks for literatur.bib [page:1]
 
-\bibliography{apssamp}% Produces the bibliography via BibTeX.
 \end{document}
