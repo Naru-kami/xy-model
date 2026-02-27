@@ -273,15 +273,18 @@ void generateData() {
 };
 
 void generateAutoCorrelationData() {
-  H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::Overwrite);
+  H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::ReadWrite);
 
-  const int N_BURN = 4096;
-  const int N_MEAS = 4096;
-  std::vector<double> gridSizes({64});
-  auto T = linspace(0.02, 2, 100);
+  const int N_BURN = 256;
+  const int N_MEAS = 10000;
+  const int N_REP = 20; // Average over N_REP
 
-  std::vector<double> M(N_MEAS, 0.0);
-  std::vector<double> C(T.size(), 0.0);
+  std::vector<double> gridSizes({32, 64, 128});
+  auto T = linspace(0.5, 1.5, 20);
+
+  std::vector M(N_MEAS, 0.0);
+  // [grid][temp][meas][rep]
+  std::vector C(gridSizes.size(), std::vector(T.size(), std::vector(N_MEAS, std::vector(N_REP, 0.0))));
 
   XYModel xy(1, 1);
 
@@ -290,54 +293,53 @@ void generateAutoCorrelationData() {
     xy.resize(N, N);
 
     for (int j = 0; j < T.size(); j++)  {
-      xy.T = T[j];
-      xy.initializeData();
-
-      // configuration needs to be in equilibrium
-      for (int k = 0; k < N_BURN; k++) xy.Wolff();
-
-      double mean_m = 0.0;
-      for (int k = 0; k < N_MEAS; k++) {
-        xy.Wolff();
-        M[k] = xy.Magnetization();
-        mean_m += M[k] / N_MEAS;
-      }
-
-      // auto correlation function
-      double CX0 = 1.0;
-      auto gamma = [&M, &CX0, &mean_m](int t) {
-        double CXT = 0;
-        for (int k = 0; k <= M.size() - t - 1; k++) {
-          CXT += (M[k] - mean_m) * (M[k + t] - mean_m);
+    
+      for(int h = 0; h < N_REP; h++) {
+        xy.T = T[j];
+        xy.initializeData(true);
+  
+        // configuration needs to be in equilibrium
+        for (int k = 0; k < N_BURN; k++) xy.Wolff();
+  
+        double mean_m = 0.0;
+        for (int k = 0; k < N_MEAS; k++) {
+          xy.Wolff();
+          M[k] = xy.Magnetization();
+          mean_m += M[k] / N_MEAS;
         }
-        CXT /= M.size() - t;
-
-        return CXT / CX0;
-      };
-      CX0 = gamma(0);
-
-      // integrated auto correlation time
-      double g;
-      C[j] = 1./2.;
-      for(int k = 1; k < M.size() - 1; k++) {
-        g = gamma(k);
-        if (g < 0) break;
-
-        C[j] += g;
+  
+        // auto correlation function
+        auto CXT = [&](int t) {
+          double t_abs = std::abs(t);
+          double CXT = 0;
+          for (int k = 0; k <= M.size() - t_abs - 1; k++) {
+            CXT += (M[k] - mean_m) * (M[k + t_abs] - mean_m);
+          }
+          CXT /= M.size() - t_abs;
+          return CXT;
+        };
+        double CX0 = CXT(0);
+        
+        // integrated auto correlation time
+        double gamma = 1.0;
+        for(int k = 1; k < M.size() - 1; k++) {
+          gamma = CXT(k) / CX0;
+          if(gamma < std::exp(-1)) break;
+          // [grid][temp][meas][rep]
+          C[i][j][k][h] = gamma;
+        }
+  
       }
-
-      std::cout << "\rProgress: " << (100.0 * (i*T.size() + j + 1)/(gridSizes.size()*T.size())) << "%   " << std::flush;
+      std::cout << "\rProgress: " << (100.0 * (i * T.size() + j + 1)/(gridSizes.size()*T.size())) << "%   " << std::flush;
     }
   }
   output.createDataSet("/T", T);
-  output.createDataSet("/Metropolis/C", C);
+  output.createDataSet("/Wolff/C", C);
   
 }
 
 int main() {
-
-  // generateAutoCorrelationData();
-  generateData();
-
+  generateAutoCorrelationData();
+  // generateData();
   return 0;
 }
