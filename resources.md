@@ -20,6 +20,9 @@
 - Finite size scaling
   https://link.springer.com/chapter/10.1007/978-3-031-59900-2_6#Sec2
 
+- Finite size scaling and line fit:
+  https://arxiv.org/pdf/2109.10960
+
 # Simulations
 - https://www.veritasium.com/simulation4
 - https://rajeshrinet.github.io/blog/2014/ising-model/
