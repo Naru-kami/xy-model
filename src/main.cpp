@@ -273,73 +273,83 @@ void generateData() {
 };
 
 void generateAutoCorrelationData() {
-  H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::ReadWrite);
+  H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::Overwrite);
 
-  const int N_BURN = 256;
-  const int N_MEAS = 10000;
+  const int N_BURN = 500;
+  const int N_MEAS = 5000;
   const int N_REP = 20; // Average over N_REP
 
-  std::vector<double> gridSizes({32, 64, 128});
-  auto T = linspace(0.5, 1.5, 20);
+  std::vector<int> gridSizes({8, 16, 32, 64, 128});
+  auto T = linspace(0.5, 1.5, 40);
 
-  std::vector M(N_MEAS, 0.0);
-  // [grid][temp][meas][rep]
-  std::vector C(gridSizes.size(), std::vector(T.size(), std::vector(N_MEAS, std::vector(N_REP, 0.0))));
+  output.createDataSet("/grid", gridSizes);
+  output.createDataSet("/T", T);
 
   XYModel xy(1, 1);
+  
+  auto run = [&](bool isWolff){
 
-  for (int i = 0; i < gridSizes.size(); i++) {
-    int N = gridSizes[i];
-    xy.resize(N, N);
-
-    for (int j = 0; j < T.size(); j++)  {
+    std::vector M(N_MEAS, 0.0);
+    std::vector C(gridSizes.size(), std::vector(T.size(), std::vector(N_REP, std::vector(N_MEAS, 0.0))));
+  
+    for (int i = 0; i < gridSizes.size(); i++) {
+      int N = gridSizes[i];
+      xy.resize(N, N);
+  
+      for (int j = 0; j < T.size(); j++)  {
+      
+        for(int h = 0; h < N_REP; h++) {
+          xy.T = T[j];
+          xy.initializeData(true);
+          // configuration needs to be in equilibrium
+          for (int k = 0; k < N_BURN; k++) xy.Wolff(); // Wolff for faster burn in
     
-      for(int h = 0; h < N_REP; h++) {
-        xy.T = T[j];
-        xy.initializeData(true);
-  
-        // configuration needs to be in equilibrium
-        for (int k = 0; k < N_BURN; k++) xy.Wolff();
-  
-        double mean_m = 0.0;
-        for (int k = 0; k < N_MEAS; k++) {
-          xy.Wolff();
-          M[k] = xy.Magnetization();
-          mean_m += M[k] / N_MEAS;
-        }
-  
-        // auto correlation function
-        auto CXT = [&](int t) {
-          double t_abs = std::abs(t);
-          double CXT = 0;
-          for (int k = 0; k <= M.size() - t_abs - 1; k++) {
-            CXT += (M[k] - mean_m) * (M[k + t_abs] - mean_m);
+          double mean_m = 0.0;
+          for (int k = 0; k < N_MEAS; k++) {
+            isWolff ? xy.Wolff() : xy.Metropolis();
+            M[k] = xy.Magnetization();
+            mean_m += M[k] / N_MEAS;
           }
-          CXT /= M.size() - t_abs;
-          return CXT;
-        };
-        double CX0 = CXT(0);
-        
-        // integrated auto correlation time
-        double gamma = 1.0;
-        for(int k = 1; k < M.size() - 1; k++) {
-          gamma = CXT(k) / CX0;
-          if(gamma < std::exp(-1)) break;
-          // [grid][temp][meas][rep]
-          C[i][j][k][h] = gamma;
+    
+          // auto correlation function
+          double CX0 = 1;
+          auto Gamma = [&](int t) {
+            double t_abs = std::abs(t);
+            double CXT = 0;
+            for (int k = 0; k <= M.size() - t_abs - 1; k++) {
+              CXT += (M[k] - mean_m) * (M[k + t_abs] - mean_m);
+            }
+            CXT /= M.size() - t_abs;
+            return CXT / CX0;
+          };
+          CX0 = Gamma(0);
+          
+          // auto correlation time
+          for(int k = 0; k < M.size()-1; k++) {
+            double gamma = Gamma(k);
+            if(gamma < std::exp(-3)) break;
+            
+            C[i][j][h][k] = gamma;
+          }
         }
-  
+        
+        std::cout << "\r Progress N=" << N << ": " << (100.0 * (i * T.size() + j + 1)/(gridSizes.size()*T.size())) << "%" << std::flush;
       }
-      std::cout << "\rProgress: " << (100.0 * (i * T.size() + j + 1)/(gridSizes.size()*T.size())) << "%   " << std::flush;
     }
-  }
-  output.createDataSet("/T", T);
-  output.createDataSet("/Wolff/C", C);
-  
+    if(isWolff) {
+      output.createDataSet("/Wolff/C", C);
+    } else {
+      output.createDataSet("/Metropolis/C", C);
+    }
+  };
+  std::cout << " ==== Wolff Algorithm ==== \n" << std::endl;
+  run(true);
+  std::cout << " ==== Metropolis Algorithm ==== \n" << std::endl;
+  run(false);
+  std::cout << "Autocorrelation complete!" << std::endl;
 }
 
 int main() {
   generateAutoCorrelationData();
-  // generateData();
   return 0;
 }
