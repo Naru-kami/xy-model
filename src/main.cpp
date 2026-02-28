@@ -273,7 +273,7 @@ void generateData() {
 };
 
 void generateAutoCorrelationData() {
-  H5Easy::File output("../data/autocorrelation.hdf5", H5Easy::File::Overwrite);
+  H5Easy::File output("../data/ac-times.hdf5", H5Easy::File::Overwrite);
 
   const int N_BURN = 500;
   const int N_MEAS = 5000;
