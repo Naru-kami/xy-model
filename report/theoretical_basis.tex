@@ -1,13 +1,18 @@
 \section{Theoretical Basis}
-The theoretical basis of the XY model and the Kosterlitz-Thouless transition is rooted in the study of phase transitions and critical phenomena in two-dimensional systems. The XY model is a classical spin model that describes a system of spins on a two-dimensional lattice, where each spin can take any direction in the plane. The Hamiltonian of the XY model is given by:
+The theoretical basis of the XY model and the Kosterlitz-Thouless transition is rooted in the study of phase transitions and critical phenomena in two-dimensional systems~\cite{KosterlitzThouless1973}. The XY model is a classical spin model that describes a system of spins on a two-dimensional lattice, where each spin can take any direction in the plane. The Hamiltonian of the XY model is given by:
 \begin{equation}
 H = -J \sum_{\langle i,j \rangle} \cos(\theta_i - \theta_j)
 \end{equation}
-where $J$ is the coupling constant, $\langle i,j \rangle$ denotes nearest-neighbor pairs of spins, and $\theta_i$ is the angle of the spin at site $i$. The Kosterlitz-Thouless transition is a topological phase transition that occurs in the XY model at a critical temperature $T_c$. Below $T_c$, the system exhibits quasi-long-range order, characterized by a power-law decay of correlations, while above $T_c$,the system is in a disordered phase with exponential decay of correlations.
+where $J$ is the coupling constant (set to 1), $\langle i,j \rangle$ denotes nearest-neighbor pairs of spins, and $\theta_i$ is the angle of the spin at site $i$~\cite{XYModelhpp}. The Kosterlitz-Thouless transition is a topological phase transition that occurs in the XY model at a critical temperature $T_c \approx 1.12J$~\cite{Hasenbusch2008,Kosterlitz1974}. Below $T_c$, the system exhibits quasi-long-range order, characterized by a power-law decay of correlations, while above $T_c$, the system is in a disordered phase with exponential decay of correlations.
+
 \subsection{Markov Chain Monte Carlo Simulation}
-In order to give an overview of the methods used to simulate the XY model, we will briefly discuss the two main algorithms: the Metropolis algorithm and the Wolff cluster algorithm. Both algorithms are based on the principle of Markov Chain Monte Carlo (MCMC) simulation, which allows us to sample configurations of the system according to their Boltzmann weight. The MCMC works by generating a sequence of configurations, where each configuration is generated from the previous one by applying a stochastic update rule. The Metropolis algorithm updates the spins one at a time, while the Wolff cluster algorithm updates clusters of spins simultaneously, which can lead to faster convergence and reduced autocorrelation times, especially near critical points. In our simulations, we will compare the results obtained from both algorithms and discuss their advantages and disadvantages in the context of simulating the XY model.
+
+In order to give an overview of the methods used to simulate the XY model, we will briefly discuss the two main algorithms: the Metropolis algorithm and the Wolff cluster algorithm. Both algorithms are based on the principle of Markov Chain Monte Carlo (MCMC) simulation, which allows us to sample configurations of the system according to their Boltzmann weight~\cite{Metropolis1949}. The MCMC works by generating a sequence of configurations, where each configuration is generated from the previous one by applying a stochastic update rule. The Metropolis algorithm updates the spins one at a time, while the Wolff cluster algorithm updates clusters of spins simultaneously, which can lead to faster convergence and reduced autocorrelation times, especially near critical points~\cite{Wolff1989}. In our simulations, we will compare the results obtained from both algorithms and discuss their advantages and disadvantages in the context of simulating the XY model~\cite{main_multithreading}.
+
 \subsection{Metropolis algorithm}
-Based on the MCMC method, the Metropolis algorithm is a widely used technique for simulating statistical systems. In the context of the XY model, the Metropolis algorithm works as follows:
+
+Based on the MCMC method, the Metropolis algorithm is a widely used technique for simulating statistical systems~\cite{Metropolis1949}. In the context of the XY model, the Metropolis algorithm works as follows:
+
 \begin{enumerate}
     \item Initialize the system with a random configuration of spins.
     \item For each Monte Carlo step, select a spin at random and propose a new angle for that spin by adding $\Delta \theta \sim U[0, 2\pi]$
@@ -19,5 +24,51 @@ Based on the MCMC method, the Metropolis algorithm is a widely used technique fo
     \item If the update is accepted, update the configuration; otherwise, keep the current configuration.
     \item Repeat the process for a large number of Monte Carlo steps to ensure convergence to equilibrium.
 \end{enumerate}
-\subsection{Wolff algorithm }
-\subsection{Finite Size Scaling}
+
+The \texttt{Metropolis()} method implements single-spin flip dynamics exactly as described above~\cite{XYModelhpp}. For each lattice site $(x,y)$, it:
+
+\begin{itemize}
+\item Computes the local energy $E_{\text{now}}$ using interactions with all four nearest neighbors
+\item Proposes $\theta_i' = \theta_i + \delta$ where $\delta \sim U[0, 2\pi)$ via \texttt{randomAngle()}
+\item Computes the new local energy $E_{\text{after}}$ 
+\item Accepts the move if $E_{\text{after}} < E_{\text{now}}$ or with probability $e^{-(E_{\text{after}} - E_{\text{now}})/T}$ via \texttt{random()}
+\item Updates $\theta_i \leftarrow \theta_i + \delta \mod 2\pi$
+\end{itemize}
+
+One full sweep iterates over all $N_x \times N_y$ sites sequentially~\cite{XYModelhpp}.
+
+\subsection{Wolff algorithm}
+
+The Wolff algorithm is an efficient cluster update method that dramatically reduces critical slowing down near phase transitions~\cite{Wolff1989}. Unlike single-spin flips, it builds and flips entire correlated clusters of spins:
+
+\begin{enumerate}
+    \item Select a random seed spin $s_0$ and a random reflection angle $r \sim U[0, 2\pi)$.
+    \item Build a cluster by adding nearest neighbors with probability $p_{\rm add} = 1 - \exp\left[\min(0, 2\Delta\theta \cos(\phi))\right]$, where $\phi$ is the relative angle after reflection.
+    \item Flip all spins in the cluster by $\theta_i \to 2r - \theta_i \mod 2\pi$.
+    \item Repeat until a target number of spins have been flipped (here: $N_xN_y$ total).
+\end{enumerate}
+
+In \texttt{Wolff()}, clusters are grown using a stack-based algorithm with periodic boundary conditions, making it particularly effective for studying the XY model's BKT transition~\cite{XYModelhpp}.
+
+\subsection{Finite Size Scaling (FSS)}
+
+Finite size scaling analyzes how observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}. For the XY model near the Berezinskii-Kosterlitz-Thouless transition a kex observable is the susceptibility $\chi_L(T)$, which scales as:
+\begin{equation}
+\chi_L(T) \simeq L^{2-\eta} \exp\left( b \sqrt{ \frac{T_c - T}{T} } L^{\theta} \right),
+\end{equation}
+, where $t=\frac{T_c - T}{T}$, $\eta$ is the anomalous dimension, $b$ is a non-universal constant, and $\theta$ is a critical exponent related to the correlation length \cite{Sale2021}. 
+
+\cite{Sale2021}. The simulations use grid sizes: 
+
+$$L = 8, 16, 32, 64, 128, 256$$ 
+
+to extract $T_c$ via data collapse~\cite{main_multithreading}.
+
+The peak positions $T_{\max}(L)$ of the susceptibility were fitted using equation \eqref{eq:bkt_scaling}
+\begin{equation}
+T(L) - T_c \propto \frac{1}{\log L}
+\label{eq:bkt_scaling}
+\end{equation}
+to determine both $T_c$ and the scaling factor.
+
+\subsection{Autocorrelation Function}
