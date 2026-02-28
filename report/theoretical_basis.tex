@@ -11,7 +11,7 @@ In order to give an overview of the methods used to simulate the XY model, we wi
 
 \subsection{Metropolis algorithm}
 
-Based on the MCMC method, the Metropolis algorithm is a widely used technique for simulating statistical systems~\cite{Metropolis1949}. In the context of the XY model, the Metropolis algorithm works as follows:
+\noindent  Based on the MCMC method, the Metropolis algorithm is a widely used technique for simulating statistical systems~\cite{Metropolis1949}. In the context of the XY model, the Metropolis algorithm works as follows:
 
 \begin{enumerate}
     \item Initialize the system with a random configuration of spins.
@@ -25,7 +25,7 @@ Based on the MCMC method, the Metropolis algorithm is a widely used technique fo
     \item Repeat the process for a large number of Monte Carlo steps to ensure convergence to equilibrium.
 \end{enumerate}
 
-The \texttt{Metropolis()} method implements single-spin flip dynamics exactly as described above~\cite{XYModelhpp}. For each lattice site $(x,y)$, it:
+\noindent The \texttt{Metropolis()} method implements single-spin flip dynamics exactly as described above~\cite{XYModelhpp}. For each lattice site $(x,y)$, it:
 
 \begin{itemize}
 \item Computes the local energy $E_{\text{now}}$ using interactions with all four nearest neighbors
@@ -35,11 +35,11 @@ The \texttt{Metropolis()} method implements single-spin flip dynamics exactly as
 \item Updates $\theta_i \leftarrow \theta_i + \delta \mod 2\pi$
 \end{itemize}
 
-One full sweep iterates over all $N_x \times N_y$ sites sequentially~\cite{XYModelhpp}.
+\noindent One full sweep iterates over all $N_x \times N_y$ sites sequentially~\cite{XYModelhpp}.
 
 \subsection{Wolff algorithm}
 
-The Wolff algorithm is an efficient cluster update method that dramatically reduces critical slowing down near phase transitions~\cite{Wolff1989}. Unlike single-spin flips, it builds and flips entire correlated clusters of spins:
+\noindent The Wolff algorithm is an efficient cluster update method that dramatically reduces critical slowing down near phase transitions~\cite{Wolff1989}. Unlike single-spin flips, it builds and flips entire correlated clusters of spins:
 
 \begin{enumerate}
     \item Select a random seed spin $s_0$ and a random reflection angle $r \sim U[0, 2\pi)$.
@@ -51,20 +51,17 @@ The Wolff algorithm is an efficient cluster update method that dramatically redu
 In \texttt{Wolff()}, clusters are grown using a stack-based algorithm with periodic boundary conditions, making it particularly effective for studying the XY model's BKT transition~\cite{XYModelhpp}.
 
 \subsection{Finite Size Scaling (FSS)}
-
-Finite size scaling analyzes how observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}. For the XY model near the Berezinskii-Kosterlitz-Thouless transition a kex observable is the susceptibility $\chi_L(T)$, which scales as:
+\noindent  Finite size scaling analyzes how observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}. For the XY model near the Berezinskii-Kosterlitz-Thouless transition a kex observable is the susceptibility $\chi_L(T)$, which scales as:
 \begin{equation}
 \chi_L(T) \simeq L^{2-\eta} \exp\left( b \sqrt{ \frac{T_c - T}{T} } L^{\theta} \right),
 \end{equation}
-, where $t=\frac{T_c - T}{T}$, $\eta$ is the anomalous dimension, $b$ is a non-universal constant, and $\theta$ is a critical exponent related to the correlation length \cite{Sale2021}. 
-
-\cite{Sale2021}. The simulations use grid sizes: 
+, where $t=\frac{T_c - T}{T}$, $\eta$ is the anomalous dimension, $b$ is a non-universal constant, and $\theta$ is a critical exponent related to the correlation length \cite{Sale2021}.The simulations use grid sizes: 
 
 $$L = 8, 16, 32, 64, 128, 256$$ 
 
-to extract $T_c$ via data collapse~\cite{main_multithreading}.
+\noindent to extract $T_c$ via data collapse~\cite{main_multithreading}.
 
-The peak positions $T_{\max}(L)$ of the susceptibility were fitted using equation \eqref{eq:bkt_scaling}
+\noindent The peak positions $T_{\max}(L)$ of the susceptibility were fitted using equation \eqref{eq:bkt_scaling}
 \begin{equation}
 T(L) - T_c \propto \frac{1}{\log L}
 \label{eq:bkt_scaling}
