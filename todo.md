@@ -7,19 +7,21 @@ ToDos:
     - correct Wolff algorithm
 
     - remove Lattice sizes info -> move it to results
-    - observables - why X diverges, and C not -> critical exponents
+    - formula for vables - why X diverges, and C not -> critical exponents
     - critical exponents relation
 
-    - autocorrelation function and time
+    - ~~autocorrelation function and time~~
+
+    - 
 
 - Results
-    - Setting K_B = 1 and J = 1
-    - Temperature dependence: M, X, E, C -> second order phase transition for M - X diverges
-    - Comparing Metropolis with Wolff. Autocorrelation times, with roughly the same spin updates per sweep
-    - Critical Temperature -> obtain T_c and nu
-    - Data collapse -> use obtained T_c und nu to gain gamma
+    - ~~ Setting K_B = 1 and J = 1 ~~
+    - ~~ Temperature dependence: M, X, E, C -> second order phase transition for M - X diverges ~~ 
+    -  ~~ Comparing Metropolis with Wolff. Autocorrelation times, with roughly the same spin updates per sweep ~~ 
+    -  ~~ Critical Temperature -> obtain T_c and nu ~~ 
+    -  ~~ Data collapse -> use obtained T_c und nu to gain gamma ~~ 
 
-    - exponential fit for autocorrelation times
+    - ~~ exponential fit for autocorrelation times ~~ Tried it, and failed. Hessian is not positive definite, Newton method cannot converge.
 
 - discussion
     - Metropolis -> bad curves
