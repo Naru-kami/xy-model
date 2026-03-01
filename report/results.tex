@@ -1,27 +1,61 @@
-\section{Results and Analysis}
+\section{Results}
+We will now investigate the response of the system to changes in various parameters.
+Throughout the investigation, physical constants such as $K_B$ and $J$ will be set to 1 for simplicity.
 
+\subsection{Temperature dependence}
+\noindent To quantify the temperature dependency of observables, the measurements have been performed with some considerations in mind.
+For the system to equilibrate, the first $N_{Burn}=512$ steps have been discarded before recording any data.
+The data recording itself involved a total of $N_{Steps}=512$ steps after reaching thermal equilibrium.
+Upon adjusting the temperature, the system was again given time to equilibrate again.
+The temperature has been set at equidistant points in the interval $T \in (0, 2]$, with $\Delta T = 0.02$.
+To perform sweep over the temperature grid, the system will start at the hot state, and gradually decrease in temperatre.
+The system will only be initialized to a random spin configuration when starting a new temperature sweep.
+It will not be reinitialize after each temperature step $\Delta T$.
+This choice has been made deriberately, due to the large correlation time of specifically the Metropolis algorithm at lower temperatures, which would require larger $N_{Burn}$ to reach thermal equilibrium, especially when starting from a hot state.
+It would mean that $T_i$ and $T_{i+1}$ are slightly correlated, however by choosing $N_{Burn}$ appropriately, this correlation can be kept small, as seen in later sections.
+The entirety of the measurement comprises a total 20 temperature sweeps for all grid sizes in $L={8, 16, 32, 64, 128, 256}$.
+\begin{figure}
+    \includegraphics[width=0.466\textwidth]{../figs/Metropolis_E.pdf}
+    \includegraphics[width=0.466\textwidth]{../figs/Metropolis_C.pdf}
+    \includegraphics[width=0.466\textwidth]{../figs/Metropolis_M.pdf}
+    \includegraphics[width=0.466\textwidth]{../figs/Metropolis_X.pdf}
+    \caption{\label{fig:Metropolis_Observables}Temperature dependency of the observables using the Metropolis algorithm}
+\end{figure}
+\bigskip\\
+Fig.~\ref{fig:Metropolis_Observables} displays the temperature dependency of all four observables performed using the Metropolis algorithm.
+When all spins are aligned at $T=0$, $\langle E \rangle$ and $\langle M \rangle$ reach their expected value of $-2$ and $1$ respectively.
+Signs of a phase transition can be seen around temperatures where $C_v$ peaks and $chi$ diverges, and $\langle E \rangle$ and $\langle M \rangle$ show (strong) slope changes.
+For higher lattice sizes, these features become even more pronounced, which is due to the finite size effects.
+At higher temperatures, the spin alignment is almost completely broken, indicated by $\langle E \rangle$ and $\langle M \rangle$ approching 0.
+\begin{figure} 
+    \includegraphics[width=0.466\textwidth]{../figs/Wolff_E.pdf}
+    \includegraphics[width=0.466\textwidth]{../figs/Wolff_C.pdf}
+    \includegraphics[width=0.466\textwidth]{../figs/Wolff_M.pdf}
+    \includegraphics[width=0.466\textwidth]{../figs/Wolff_X.pdf}
+    \caption{\label{fig:Wolff_Observables}Temperature dependency of the observables using the Wolff algorithm}
+\end{figure}
+\bigskip\\
+Fig.~\ref{fig:Wolff_Observables} displays the temperature dependency for the same observables performed using the Wolff algorithm.
+The same behavior can be can be seen for this case as well.
+The main difference lies in the reduced variance of the measurements, which is a consequence of the reduced correlation time of the Wolff algorithm.
+Furthermore, the peaks for the susceptibility are more pronounced and shifted more towards the theoretical values for $T_c$.
+The single spin updates of the Metropolis algorithm are heavily affected by critical slowing down, resulting in a larger correlation time and thus higher variance of the measurements.
 
-\subsection{Metropolis}
-
-
-\paragraph{Autocorrelation}
-\paragraph{Susceptibility}
-\paragraph{Critical temperature}
-
-
-\subsection{Wolff}
-
-\paragraph{Autocorrelation}
-\paragraph{Susceptibility}
-\paragraph{Critical temperature}
-
-
-\subsection{Finite Size Scaling}
-
-\paragraph{Critical Exponents}
-
-\paragraph{Susceptibility}
-
-\paragraph{Critical temperature}
-
-\subsection{Comparison}
+\subsection{Autocorrelation time}
+We have already seen the effects of autocorrelation times on the measurements in the previous subsection, and now we want to quantify them.
+The autocorrelation function is given by eq.~(\ref{eq:Autocorrelation_Function}), which is used to measure the time steps needed for two spin configurations to become statistically independent, accoring to eq.~(\ref{eq:Autocorrelation_Time}).
+In order to accurately compare the two algorithm, we defined a time step for an algorithm as the attempt to flip all the spins on the lattice.
+At a given temperature, the system will be initialized to a cold state for quicker equilibration in the burn-in phase with $N_{Burn}=500$.
+After reaching thermal equilibrium, a total of $N_{Meas}=5000$ samples are taken to make sure that the autocorrelation time $\tau$ is well within that range, and for a more accurate estimation of the mean of the observable.
+The absolute value of the magnetization $\left| M \right|$ is chosen as the observable.
+Then, the autocorrelation function is calculated for all time steps until $\Gamma_M{t} < e^{-3}$, after which there was mostly just noise.
+Such a measurement is then repeated $N_{Rep}=20$ times.
+This will be repeated for all temperatures in $T \in [0.5, 1.5]$ with 40 temperature points inside, and all lattice sizes in $L={8, 16, 32, 64, 128}$.
+\begin{figure}[b]
+    \includegraphics[width=0.466\textwidth]{../figs/Autocorrelation_Metropolis.pdf}
+    \caption{\label{fig:Autocorrelation_Metropolis}Autocorrelation values as a function of time steps for the Metropolis algorithm at $L=128$.}
+    \includegraphics[width=0.466\textwidth]{../figs/Autocorrelation_time_Metropolis.pdf}
+    \caption{\label{fig:Autocorrelation_Time_Metropolis}Autocorrelation times as a function of temperature for the Metropolis algorithm for different lattice sizes.}
+\end{figure}
+\bigskip\\
+Fig~(\ref{fig:Autocorrelation_Metropolis})

@@ -173,7 +173,7 @@ void generateData() {
   
   // Setting temperature grid points
   auto T = linspace(0.02, 2, N_T);
-  std::vector<int> gridSizes({32, 16, 8});
+  std::vector<int> gridSizes({256, 128, 64, 32, 16, 8});
   output.createDataSet("/T", T);
   output.createDataSet("/gridSizes", gridSizes);
     
@@ -350,6 +350,7 @@ void generateAutoCorrelationData() {
 }
 
 int main() {
-  generateAutoCorrelationData();
+  // generateAutoCorrelationData();
+  // generateData();
   return 0;
 }
