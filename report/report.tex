@@ -6,6 +6,31 @@
 \usepackage[utf8]{inputenc}
 \usepackage{lineno}  % Remove mathlines - causes issues
 
+\usepackage{amsmath, amssymb, amsfonts, mathtools}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+
+
+
+
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  language=C++,
+  tabsize=2,
+  breaklines=true,
+  captionpos=b
+}
+
 \bibliographystyle{apsrev4-2}
 
 \begin{document}
@@ -47,7 +72,7 @@ use the optional argument of the \verb+\item+ command to give the category of ea
 %------------------------------ Theoretical Basis -----------------------------------------
 \input{theoretical_basis.tex}
 %------------------------------ Methods -----------------------------------
-\input{Methods}
+%\input{Methods}
 
 
 %------------------------------ Results -----------------------------------

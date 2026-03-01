@@ -1,4 +1,4 @@
-\section{Theoretical Basis}
+\section{Theoretical Basis and Methods}
 The theoretical basis of the XY model and the Kosterlitz-Thouless transition is rooted in the study of phase transitions and critical phenomena in two-dimensional systems~\cite{KosterlitzThouless1973}. The XY model is a classical spin model that describes a system of spins on a two-dimensional lattice, where each spin can take any direction in the plane. The Hamiltonian of the XY model is given by:
 \begin{equation}
 H = -J \sum_{\langle i,j \rangle} \cos(\theta_i - \theta_j)
@@ -68,4 +68,33 @@ T(L) - T_c \propto \frac{1}{\log L}
 \end{equation}
 to determine both $T_c$ and the scaling factor.
 
-\subsection{Autocorrelation Function}
+
+\subsection{Autocorrelation}
+Generally speaking, the autocorrelation function $C_X(t)$ of an observable $X$ measures how correlated the values of $X$ are at different times (or Monte Carlo steps) $t$. It is defined as:
+\[
+C_X(t)\;\stackrel{\mathrm{def}}{=}\;\big\langle (X_i-\mu)\,(X_{i+t}-\mu)\big\rangle
+\]
+
+\noindent where $\mu$ is the mean of $X$ and the average $\langle \cdot \rangle$ is taken over the Monte Carlo samples. The normalized autocorrelation function $\Gamma_X(t)$ is then given by:
+
+\[
+\Gamma_X(t)\;\stackrel{\mathrm{def}}{=}\;\frac{C_X(t)}{C_X(0)} \, .
+\]
+\cite{PetschliesUrbach2026}
+It is a measure of how quickly the system "forgets" its past configurations.
+
+$C_X(t)$ depends only on the time difference $t$.
+Typically, the autocovariance decays exponentially,
+\begin{equation}
+  C_X(t)\propto \sum_{n\ge 0} A_n\,\exp\!\left(-\frac{|t|}{\tau_n}\right),
+  \qquad \tau_0>\tau_1>\cdots \in \mathbb{R}^+ .
+\end{equation}
+For sufficiently large $|t|$ only the largest correlation time $\tau_0$ survives.
+Hence, one defines the exponential autocorrelation time by
+\begin{equation}
+  \tau_{\exp}\stackrel{\mathrm{def}}{=}\limsup_{t\to\infty}\frac{-t}{\ln\!\bigl|\Gamma_X(t)\bigr|}\,,
+  \qquad \Gamma_X(t)=\frac{C_X(t)}{C_X(0)} .
+\end{equation}
+\cite{PetschliesUrbach2026}
+
+
