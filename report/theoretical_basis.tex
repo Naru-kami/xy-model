@@ -52,8 +52,10 @@ In \texttt{Wolff()}, clusters are grown using a stack-based algorithm with perio
 
 \subsection{Finite Size Scaling (FSS)}
 \noindent  Finite size scaling analyzes how observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}. For the XY model near the Berezinskii-Kosterlitz-Thouless transition a kex observable is the susceptibility $\chi_L(T)$, which scales as:
+
 \begin{equation}
-\chi_L(T) \simeq L^{2-\eta} \exp\left( b \sqrt{ \frac{T_c - T}{T} } L^{\theta} \right),
+  \chi(L,t) \approx L^{\gamma/\nu} \,\hat{\chi}\!\left( L \exp\!\left(-b\, t^{-\nu}\right) \right)
+  \label{eq:Susceptibility_Scale}
 \end{equation}
 , where $t=\frac{T_c - T}{T}$, $\eta$ is the anomalous dimension, $b$ is a non-universal constant, and $\theta$ is a critical exponent related to the correlation length \cite{Sale2021}.The simulations use grid sizes: 
 
@@ -71,15 +73,17 @@ to determine both $T_c$ and the scaling factor.
 
 \subsection{Autocorrelation}
 Generally speaking, the autocorrelation function $C_X(t)$ of an observable $X$ measures how correlated the values of $X$ are at different times (or Monte Carlo steps) $t$. It is defined as:
-\[
+\begin{equation}
 C_X(t)\;\stackrel{\mathrm{def}}{=}\;\big\langle (X_i-\mu)\,(X_{i+t}-\mu)\big\rangle
-\]
+\end{equation}
 
 \noindent where $\mu$ is the mean of $X$ and the average $\langle \cdot \rangle$ is taken over the Monte Carlo samples. The normalized autocorrelation function $\Gamma_X(t)$ is then given by:
 
-\[
-\Gamma_X(t)\;\stackrel{\mathrm{def}}{=}\;\frac{C_X(t)}{C_X(0)} \, .
-\]
+\begin{equation}
+  \Gamma_X(t)\;\stackrel{\mathrm{def}}{=}\;\frac{C_X(t)}{C_X(0)} 
+  \label{eq:Autocorrelation_Function}
+\end{equation}
+
 \cite{PetschliesUrbach2026}
 It is a measure of how quickly the system "forgets" its past configurations.
 
@@ -94,7 +98,6 @@ Hence, one defines the exponential autocorrelation time by
 \begin{equation}
   \tau_{\exp}\stackrel{\mathrm{def}}{=}\limsup_{t\to\infty}\frac{-t}{\ln\!\bigl|\Gamma_X(t)\bigr|}\,,
   \qquad \Gamma_X(t)=\frac{C_X(t)}{C_X(0)} .
+  \label{eq:Autocorrelation_Time}
 \end{equation}
 \cite{PetschliesUrbach2026}
-
-
