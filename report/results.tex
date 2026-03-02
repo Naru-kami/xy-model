@@ -3,6 +3,7 @@ We will now investigate the response of the system to changes in various paramet
 Throughout the investigation, physical constants such as $K_B$ and $J$ will be set to 1 for simplicity.
 
 \subsection{Temperature dependency}
+\label{Temperature_dependency}
 To quantify the temperature dependency of observables, the measurements have been performed with some considerations in mind.
 For the system to equilibrate, the first $N_{Burn}=512$ steps have been discarded before recording any data.
 The data recording itself involved a total of $N_{Steps}=512$ steps after reaching thermal equilibrium.
@@ -13,7 +14,7 @@ The system will only be initialized to a random spin configuration when starting
 It will not be reinitialize after each temperature step $\Delta T$.
 This choice has been made deriberately, due to the large correlation time of specifically the Metropolis algorithm at lower temperatures, which would require larger $N_{Burn}$ to reach thermal equilibrium, especially when starting from a hot state.
 It would mean that $T_i$ and $T_{i+1}$ are slightly correlated, however by choosing $N_{Burn}$ appropriately, this correlation can be kept small, as seen in later sections.
-The entirety of the measurement comprises a total 20 temperature sweeps for all grid sizes in $L={8, 16, 32, 64, 128, 256}$.
+The entirety of the measurement comprises a total $N_{Rep}=20$ temperature sweeps for all grid sizes in $L={8, 16, 32, 64, 128, 256}$.
 \begin{figure}
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_M.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_X.pdf}
@@ -111,7 +112,7 @@ However, this approach collapsed the data onto either a single point or a single
 The XY model is not necessarily restricted to a two dimensional lattice.
 In order to apply it to a 3d lattice, or potentially even higher dimensions, the Metropolis and Wolff algorithm, and the extraction of the energy $E$ and magnetization $M$ have to be adjusted to account for the newly added neighbors.
 After the adjustment, the measurement can be performed in the same manner as for the 2D case.
-The analysis will also be analogous, and the relevant plots can be found in Appendix~\ref{fig:3DWolff_Energy_SpecificHeat}.
+The analysis will also be analogous, and the relevant plots can be found in Appendix~\ref{fig:3DWolff_Energy_SpecificHeat}13.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4275\textwidth]{../figs/3DWolff_X.pdf}
