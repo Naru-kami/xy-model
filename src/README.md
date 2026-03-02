@@ -1,5 +1,5 @@
-# XY Model Simulation
-These are command line instructions to run the C++ file. Make sure the current working directory is the root of this repository.
+# XY Model Simulation om C++
+These are command line instructions to compile and run the C++ files. Make sure the current working directory is the root of this repository.
 1. Install necessary libraries: `cmake`, `hdf5`
     ```
     sudo pacman -S cmake hdf5
@@ -23,3 +23,5 @@ These are command line instructions to run the C++ file. Make sure the current w
     ```
     ./xy-model
     ```
+
+Code base needs to be adjusted accordingly, when trying to simluate the same results as in the report.
