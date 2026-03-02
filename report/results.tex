@@ -15,8 +15,7 @@ This choice has been made deriberately, due to the large correlation time of spe
 It would mean that $T_i$ and $T_{i+1}$ are slightly correlated, however by choosing $N_{Burn}$ appropriately, this correlation can be kept small, as seen in later sections.
 The entirety of the measurement comprises a total 20 temperature sweeps for all grid sizes in $L={8, 16, 32, 64, 128, 256}$.
 \begin{figure}
-    \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_E.pdf}
-    \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_C.pdf}
+    
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_M.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_X.pdf}
     \caption{\label{fig:Metropolis_Observables}Temperature dependency of the observables using the Metropolis algorithm}
@@ -28,8 +27,8 @@ Signs of a phase transition can be seen around temperatures where $C_v$ peaks an
 For higher lattice sizes, these features become even more pronounced, which is due to the finite size effects.
 At higher temperatures, the spin alignment is almost completely broken, indicated by $\langle E \rangle$ and $\langle M \rangle$ approching 0.
 \begin{figure}
-    \includegraphics[width=0.4275\textwidth]{../figs/Wolff_E.pdf}
-    \includegraphics[width=0.4275\textwidth]{../figs/Wolff_C.pdf}
+    %\includegraphics[width=0.4275\textwidth]{../figs/Wolff_E.pdf}
+    %\includegraphics[width=0.4275\textwidth]{../figs/Wolff_C.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Wolff_M.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Wolff_X.pdf}
     \caption{\label{fig:Wolff_Observables}Temperature dependency of the observables using the Wolff algorithm}
