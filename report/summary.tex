@@ -1,20 +1,12 @@
 \section{Summary}
-\noindent The two-dimensional XY model, defined by the Hamiltonian 
-\begin{equation}
-H = -J \sum_{\langle i,j \rangle} \cos(\theta_i - \theta_j)
-\end{equation}
-with $J=1$ and continuous planar spins $\theta_i \in [0, 2\pi)$, exhibits the iconic Kosterlitz-Thouless (KT) transition at $T_c \approx 0.893$ \cite{kosterlitz1973,Hasenbusch2005}. Unlike conventional second-order transitions, the KT transition is topological: below $T_c$, bound vortex-antivortex pairs maintain quasi-long-range order with algebraically decaying correlations $\langle \cos(\theta_0 - \theta_r) \rangle \sim r^{-\eta(T)}$, while above $T_c$ these pairs unbind, yielding exponential decay and true disorder.
 
-Monte Carlo simulations compare single-spin flip Metropolis updates against Wolff cluster flips across lattice sizes $L=8,16,32,64,128,256$. Temperature sweeps ($T \in [0,2]$, $\Delta T=0.02$) reveal characteristic finite-size effects: susceptibility peaks sharpen and shift toward $T_c$ with increasing $L$, while energy per spin $E/N$, specific heat $C_V$, and magnetization $M$ show inflection points near criticality. Metropolis suffers severe critical slowing down ($\tau_\text{exp} \sim 10^3-10^5$ near $T_c$, diverging as $\tau \propto \xi^z$ with $z\approx 2$), whereas Wolff cluster updates reduce $\tau$ by 1-2 orders of magnitude ($\tau \sim 10-10^3$), enabling reliable sampling even for $L=256$ \cite{Wolff1989}.
+\noindent The 2D XY model has Hamiltonian $$H = -J \sum_{\langle i,j \rangle} \cos(\theta_i - \theta_j)$$,
+with $J=1$ and spins $\theta_i \in [0, 2\pi)$ shows the Kosterlitz-Thouless (KT) transition at $T_c \approx 0.893$. Below $T_c$, bound vortex-antivortex pairs maintain quasi-long-range order; above $T_c$, they unbind, causing disorder.
 
-Finite-size scaling analysis of susceptibility peak positions $T_\text{max}(L)$ follows the KT form
-\begin{equation}
-T_\text{max}(L) = T_c + \frac{A}{\ln L^\nu},
-\end{equation}
-yielding fitted parameters $T_c = 0.884 \pm 0.026$ and $\nu = 0.562 \pm 0.057$ ($\chi^2_\nu = 0.88/6$), consistent with high-precision values $T_c = 0.893(1)$, $\nu=0.5$ \cite{Hasenbusch2010,Hasenbusch2005}. Data collapse of rescaled susceptibility 
-\begin{equation}
-\frac{\chi(L,T)}{L^\eta} = f\left( L^{1/\nu} |t| \right), \quad t = \frac{T-T_c}{T_c}
-\end{equation}
-achieves good overlap using $\eta \approx 0.01 \pm 0.01$, $b \approx 1.68$ (visually optimized), supporting theoretical expectations $\eta(T_c)=1/4$ via universal scaling relations.
+\noindent Monte Carlo simulations compare Metropolis single-spin flips and Wolff cluster flips on lattices $L=8$ to $256$, with $T \in [0.1, 1.5]$ in steps of $0.02$.
+Susceptibility peaks sharpen and shift to $T_c$ as $L$ grows. Metropolis suffers strong critical slowing down ($\tau_{\texttt{exp}} \sim 10^3-10^5$ near $T_c$), while Wolff reduces it by 1-2 orders ($\tau \sim 10-10^3$). Meaning in order to get accurate results for the Metropolis algorithm, you would need to take significantly more measurements than for the Wolff algorithm, which is more efficient in this regard.
 
-Key findings affirm Wolff's superiority for continuous symmetry models near topological transitions, where local updates fail due to growing correlated domains. While Metropolis suffices for qualitative trends, precise $T_c$ extraction and exponent estimation demand cluster methods. Future refinements could incorporate adaptive binning based on real-time $\tau$ estimation, finer $T$-grids near $T_c$, or larger $L>256$ (limited by current compute). Higher-$d$ XY models briefly noted exhibit conventional transitions, underscoring 2D uniqueness via Mermin-Wagner. These results validate simulation protocols for computational physics coursework, aligning theory with numerical evidence for vortex-driven phase transitions.
+\noindent Furthermore Finite-size scaling was implemented. This leads to susceptibility peaks giving $T_c = 0.884 \pm 0.026$, $\nu = 0.562 \pm 0.057$, matching known values $T_c = 0.893$, $\nu=0.5$.
+A data collapse of $\chi(L,T)$ using $\eta \approx 0.01$, $b \approx 1.68$ confirms scaling, consistent with KT theory predicting $\eta(T_c)=1/4$.
+
+\noindent Wolff excels near transitions in symmetric models, unlike local Metropolis updates. Metropolis works for trends, but clusters are needed for precise $T_c$ and exponents. Overall the superior performance of Wolff algorithm in reducing autocorrelation times and improving accuracy near criticality is evident, making it the preferred choice for studying the XY model's KT transition.
