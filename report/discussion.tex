@@ -10,7 +10,7 @@ However this would also increase the computational time, especially for the Metr
 The Wolff algorithm would benefit less from this improvement, as its correlation time is already at order $\tau_{\text{exp}} \sim 10^0$.
 \par
 Performing the data collapse by visual judgement proved to be more difficult due to the scaling of larger lattice sizes resulting in fewer usable points around the peak.
-This could be remdied by deploying a finer temperature grid.
+This could be remedied by deploying a finer temperature grid.
 In order to limit the increased computational time that would result from this, instead of using equidistant points, distributing them more around the critical temperature and less in the regions around, one could effectively improve the quality of the curves without the increased computational cost.
 \par
 For further improvements a combination of CUDA and Pytorch could be used to further speed up the simulations, especially for larger lattice sizes.

@@ -9,10 +9,10 @@ For the system to equilibrate, the first $N_{Burn}=512$ steps have been discarde
 The data recording itself involved a total of $N_{Steps}=512$ steps after reaching thermal equilibrium.
 Upon adjusting the temperature, the system was again given time to equilibrate again.
 The temperature has been set at equidistant points in the interval $T \in (0, 2]$, with $\Delta T = 0.02$.
-To perform sweep over the temperature grid, the system will start at the hot state, and gradually decrease in temperatre.
+To perform sweep over the temperature grid, the system will start at the hot state, and gradually decrease in temperature.
 The system will only be initialized to a random spin configuration when starting a new temperature sweep.
 It will not be reinitialize after each temperature step $\Delta T$.
-This choice has been made deriberately, due to the large correlation time of specifically the Metropolis algorithm at lower temperatures, which would require larger $N_{Burn}$ to reach thermal equilibrium, especially when starting from a hot state.
+This choice has been made deliberately, due to the large correlation time of specifically the Metropolis algorithm at lower temperatures, which would require larger $N_{Burn}$ to reach thermal equilibrium, especially when starting from a hot state.
 It would mean that $T_i$ and $T_{i+1}$ are slightly correlated, however by choosing $N_{Burn}$ appropriately, this correlation can be kept small, as seen in later sections.
 The entirety of the measurement comprises a total $N_{Rep}=20$ temperature sweeps for all grid sizes in $L={8, 16, 32, 64, 128, 256}$.
 \begin{figure}[h]
@@ -33,7 +33,7 @@ At higher temperatures, the spin alignment is almost completely broken, indicate
 \end{figure}
 \par
 Fig.~\ref{fig:Wolff_Observables} displays the temperature dependency for the same observables performed using the Wolff algorithm.
-The same behavior can be can be seen for this case as well.
+The same behavior can be seen for this case as well.
 The main difference lies in the reduced variance of the measurements, which is a consequence of the reduced correlation time of the Wolff algorithm.
 Furthermore, the peaks for the susceptibility are more pronounced and shifted more towards the theoretical values for $T_c$.
 The single spin updates of the Metropolis algorithm are heavily affected by critical slowing down, resulting in a larger correlation time and thus higher variance of the measurements.
@@ -83,11 +83,11 @@ By determining the temperature at which the peaks arise, we can extrapolate the 
 Performing a line fit through the peak temperatures will then give us an estimate for $T_c$ and the critical exponent $\nu$.
 \begin{figure}
     \includegraphics[width=0.4275\textwidth]{../figs/TC_fit.pdf}
-    \caption{\label{fig:TC_fit}Plottet are the temperatures at which $\chi$ peaks for various lattice sizes. Fittet is a line according to eq.~(\ref{eq:bkt_scaling}).}
+    \caption{\label{fig:TC_fit}Plotted are the temperatures at which $\chi$ peaks for various lattice sizes. Fitted is a line according to eq.~(\ref{eq:bkt_scaling}).}
 \end{figure}
 \par
 Fig.~\ref{fig:TC_fit} displays the peak temperatures $T_{C, \chi} (L)$ with a line fit using $T_c(L) = T_c(\infty) + \text{A}\cdot \ln(L)^{-1/\nu}$.
-The fittet parameters are found to be $T_c(\infty) = 0.884 \pm 0.026$ and $\nu = 0.562 \pm 0.057$.
+The fitted parameters are found to be $T_c(\infty) = 0.884 \pm 0.026$ and $\nu = 0.562 \pm 0.057$.
 Within the standard deviation, the estimated critical temperature is consistent with the theoretical value of $T_c = 0.89294$ \cite{Hasenbusch2005}.
 The critical exponent for the correlation length is estimated to be $\nu = 0.562 \pm 0.057$, which is close but outside of the range for the theoretical value of $\nu = \frac{1}{2}$ \cite{Hasenbusch2005,Sale2021}.
 Adding more data points for larger lattice sizes could potentially improve the estimation of $\nu$ and the reduced chi-squared value of the fit of $\chi^2$/$n_\mathrm{{dof}}=0.15$.

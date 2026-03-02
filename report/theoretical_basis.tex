@@ -1,7 +1,6 @@
 \section{Theoretical Basis and Methods}
-% The theoretical basis of the XY model and the Kosterlitz-Thouless transition is rooted in the study of phase transitions and critical phenomena in two-dimensional systems~\cite{KosterlitzThouless1973}.
-The XY model is a classical spin model, that generalizes the Ising model with a continuous two dimensional spin vector with unit length $\vec{s} = (s_x, s_y)$.
-Due to the normilization of the spin vector, each spin can be described by only one parameter $\vec{s}_i = (\cos\theta_i, \sin\theta_i)$.
+The XY model is a classical spin model that generalizes the Ising model with a continuous two dimensional spin vector with unit length $\vec{s} = (s_x, s_y)$.
+Due to the normalization of the spin vector, each spin can be described by only one parameter $\vec{s}_i = (\cos\theta_i, \sin\theta_i)$.
 In the absence of an external magnetic field, the Hamiltonian of the XY model is thus given by:
 \begin{equation}
 \mathcal{H} = -J \sum_{\langle i,j \rangle} s_i \cdot s_j = -J \sum_{\langle i,j \rangle} \cos(\theta_i - \theta_j)
@@ -14,8 +13,8 @@ In the case of two dimensions, the Kosterlitz-Thouless transition occurs in the 
 \subsection{Markov Chain Monte Carlo Simulation}
 A Markov Chain Monte Carlo Simulation (MCMC) works by generating a sequence of configurations, where each configuration is generated from the previous one by applying a stochastic update rule.
 In general, for such an algorithm to generate physically meaningful configurations, it must satisfy two key properties: Ergodicity and detailed balance.
-A processs is said to be ergodic, if it can reach any possible mictrostate within the complete state space of $\Omega$, i.e. there must be a non zero probability to reach state $b$ from state $a$~\cite{PetschliesUrbach2026}.
-Furthermore, a process is said to fulfill detailed balance, if, for a distribution $\pi$ and a transition matrix $P$, it fulfills the condition $\pi_\nu p_{\nu\mu} = \pi_\mu p_{\mu\nu}$, i.e. the flow between states, or the expected number of transitions per unit time, $\nu \rightarrow \mu$ must equal to its reverse $\nu \leftarrow \mu$~\cite{PetschliesUrbach2026}.
+A process is said to be ergodic, if it can reach any possible microstate within the complete state space of $\Omega$, i.e. there must be a non zero probability to reach state $b$ from state $a$~\cite{PetschliesUrbach2026}.
+Furthermore, a process is said to fulfill detailed balance, if, for a distribution $\pi$ and a transition matrix $P$, it fulfills the condition $\pi_\nu p_{\nu\mu} = \pi_\mu p_{\mu\nu}$, i.e. the flow between states, or the expected number of transitions per unit time, $\nu \rightarrow \mu$ must be equal to its reverse $\nu \leftarrow \mu$~\cite{PetschliesUrbach2026}.
 Detailed balance is a stronger condition and ensures the correct target distribution at equilibrium.
 
 In order to give an overview of the methods used to simulate the XY model, we will briefly discuss the two main algorithms: the Metropolis algorithm and the Wolff cluster algorithm.
@@ -55,7 +54,7 @@ One full sweep iterates over all $N_x \times N_y$ sites sequentially.
 The Wolff algorithm is an efficient cluster update method that dramatically reduces critical slowing down near phase transitions~\cite{Wolff1989}.
 Unlike single-spin flips, it builds and flips entire correlated clusters of spins:
 \begin{enumerate}
-  \item Chose a random reflection angle $\rho \sim U[0, 2\pi)$ and a random lattice site $s_i$ as the clusters root.
+  \item Choose a random reflection angle $\rho \sim U[0, 2\pi)$ and a random lattice site $s_i$ as the clusters root.
   \item Flip $s_i \rightarrow s_i = (\cos(2\rho - \theta_i + \pi), \sin(2\rho - \theta_i + \pi))$
   \item Visit all neighboring sites, and activate the bond to $s_i$ with probability
   $$
@@ -74,7 +73,7 @@ One full sweep will attempt to flip clusters, as long as the expected cluster si
 % making it particularly effective for studying the XY model's BKT transition.
 
 \subsection{Observables}
-In order to analyze the behavior of the system in response to the temperature, some obervables need to be measured.
+In order to analyze the behavior of the system in response to the temperature, some observables need to be measured.
 These observables are known to exhibit interesting properties near the phase transition.
 
 The magnetization can be thought of as the average alignment of the spins in the system of size $L \times L$, and is given for a specific spin configuration $k$ by
@@ -86,7 +85,7 @@ $$
   \langle M \rangle = \frac{1}{N} \sum_{i=0}^{N} M_i \;.
 $$
 Another interesting property is the magnetic susceptibility $\chi$, which quantifies the response of the system to a applied external magnetic field.
-It is expected to diverge near the critical temperature~\cite{Kosterlitz1974}, and will thus be an excellent observble to analyze the system near the critical temperature.
+It is expected to diverge near the critical temperature~\cite{Kosterlitz1974}, and will thus be an excellent observable to analyze the system near the critical temperature.
 Intuitively, it can be thought of as the variance of the magnetization, and is given by
 $$
   \chi = \frac{L^2}{T} ( \langle M^2 \rangle - \langle M \rangle^2) \;.
@@ -110,7 +109,7 @@ where $\nu$ is the critical exponent of the correlation length $\xi$, $\gamma$ t
 A value of $\eta = 1/4$ is the same as that of the Ising model predicted by Onsager.~\cite{Kosterlitz1974}
 
 \subsection{Finite Size Scaling (FSS)}
-Finite size scaling analyzes how the observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}.
+Finite-size scaling analyzes how the observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}.
 In theory, the correlation length diverges at $T_c$, but for a finite system size it is bounded by $L$.
 Thus, one expects the observables to exhibit such a scaling behavior.
 So, for the XY model near the phase transition, the susceptibility $\chi_L(T)$ scales as
@@ -120,7 +119,7 @@ So, for the XY model near the phase transition, the susceptibility $\chi_L(T)$ s
   \label{eq:Susceptibility_Scale}
 \end{equation}
 with $t$ the reduced temperature, $b$ a non-universal constant, and $\nu$ is a critical exponent related to the correlation length~\cite{Sale2021}.
-By scaling the data for various lattice sizes accordingly, the curves will collapse onto a single universal curve, allowing the exctraction of the critical exponents and critical temperature.
+By scaling the data for various lattice sizes accordingly, the curves will collapse onto a single universal curve, allowing the extraction of the critical exponents and critical temperature.
 
 Another method to extract these quantities, is by fitting a line through the peak positions $T_c(L)$ of the susceptibility as a function of lattice size.
 The peak positions scale according to 
@@ -154,4 +153,4 @@ Hence, one defines the exponential autocorrelation time by
   \tau_{\exp}\stackrel{\mathrm{def}}{=}\limsup_{t\to\infty}\frac{-t}{\ln\!\bigl|\Gamma_X(t)\bigr|}\,.
   \label{eq:Autocorrelation_Time}
 \end{equation}
-It is the time needed for the autocorrelation to be reduced by a factor of order $e$, and needs to be taken into account when generating statistically independen MCMC configurations.~\cite{PetschliesUrbach2026}
+It is the time needed for the autocorrelation to be reduced by a factor of order $e$, and needs to be taken into account when generating statistically independent MCMC configurations.~\cite{PetschliesUrbach2026}
