@@ -1,7 +1,7 @@
 \section{Summary}
 
 \noindent The two-dimensional XY model
-with $J=1$ and spins $\theta_i \in [0, 2\pi)$ shows the Kosterlitz-Thouless (KT) transition at $T_c \approx 0.893$. Below $T_c$, bound vortex-antivortex pairs maintain quasi-long-range order; above $T_c$, they unbind, causing disorder.
+with $J=1$ and spins $\theta_i \in [0, 2\pi)$ shows the Kosterlitz-Thouless (KT) transition at $T_c \approx 0.893$. Below $T_c$, bound vortex-antivortex pairs maintain long-range order; above $T_c$, they unbind, causing disorder.
 
 \noindent Monte Carlo simulations compare Metropolis single-spin flips and Wolff cluster flips on lattices $L=8$ to $256$, with $T \in [0.1, 1.5]$ in steps of $0.02$.
 Susceptibility peaks sharpen and shift to $T_c$ as $L$ grows. Metropolis suffers strong critical slowing down ($\tau_{\texttt{exp}} \sim 10^3-10^5$ near $T_c$), while Wolff reduces it by 1-2 orders ($\tau \sim 10-10^3$). Meaning in order to get accurate results for the Metropolis algorithm, you would need to take significantly more measurements than for the Wolff algorithm, which is more efficient in this regard.
