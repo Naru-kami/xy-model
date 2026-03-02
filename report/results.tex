@@ -3,7 +3,7 @@ We will now investigate the response of the system to changes in various paramet
 Throughout the investigation, physical constants such as $K_B$ and $J$ will be set to 1 for simplicity.
 
 \subsection{Temperature dependency}
-\noindent To quantify the temperature dependency of observables, the measurements have been performed with some considerations in mind.
+To quantify the temperature dependency of observables, the measurements have been performed with some considerations in mind.
 For the system to equilibrate, the first $N_{Burn}=512$ steps have been discarded before recording any data.
 The data recording itself involved a total of $N_{Steps}=512$ steps after reaching thermal equilibrium.
 Upon adjusting the temperature, the system was again given time to equilibrate again.
@@ -15,25 +15,22 @@ This choice has been made deriberately, due to the large correlation time of spe
 It would mean that $T_i$ and $T_{i+1}$ are slightly correlated, however by choosing $N_{Burn}$ appropriately, this correlation can be kept small, as seen in later sections.
 The entirety of the measurement comprises a total 20 temperature sweeps for all grid sizes in $L={8, 16, 32, 64, 128, 256}$.
 \begin{figure}
-    
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_M.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_X.pdf}
     \caption{\label{fig:Metropolis_Observables}Temperature dependency of the observables using the Metropolis algorithm}
 \end{figure}
-\bigskip\\
+\par
 Fig.~\ref{fig:Metropolis_Observables} displays the temperature dependency of all four observables performed using the Metropolis algorithm.
 When all spins are aligned at $T=0$, $\langle E \rangle$ and $\langle M \rangle$ reach their expected value of $-2$ and $1$ respectively.
 Signs of a phase transition can be seen around temperatures where $C_v$ peaks and $\chi$ diverges, and $\langle E \rangle$ and $\langle M \rangle$ show (strong) slope changes.
 For higher lattice sizes, these features become even more pronounced, which is due to the finite size effects.
 At higher temperatures, the spin alignment is almost completely broken, indicated by $\langle E \rangle$ and $\langle M \rangle$ approching 0.
 \begin{figure}
-    %\includegraphics[width=0.4275\textwidth]{../figs/Wolff_E.pdf}
-    %\includegraphics[width=0.4275\textwidth]{../figs/Wolff_C.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Wolff_M.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Wolff_X.pdf}
     \caption{\label{fig:Wolff_Observables}Temperature dependency of the observables using the Wolff algorithm}
 \end{figure}
-\bigskip\\
+\par
 Fig.~\ref{fig:Wolff_Observables} displays the temperature dependency for the same observables performed using the Wolff algorithm.
 The same behavior can be can be seen for this case as well.
 The main difference lies in the reduced variance of the measurements, which is a consequence of the reduced correlation time of the Wolff algorithm.
@@ -41,7 +38,6 @@ Furthermore, the peaks for the susceptibility are more pronounced and shifted mo
 The single spin updates of the Metropolis algorithm are heavily affected by critical slowing down, resulting in a larger correlation time and thus higher variance of the measurements.
 
 \subsection{Autocorrelation time}
-\noindent
 We have already seen the effects of autocorrelation times on the measurements in the previous subsection, and now we want to quantify them.
 The autocorrelation function is given by eq.~(\ref{eq:Autocorrelation_Function}), which is used to measure the time steps needed for two spin configurations to become statistically independent, according to eq.~(\ref{eq:Autocorrelation_Time}).
 In order to accurately compare the two algorithm, we defined a time step for an algorithm as the attempt to flip all the spins on the lattice.
@@ -59,7 +55,7 @@ This will be repeated for all temperatures in $T \in [0.5, 1.5]$ with 40 tempera
     \includegraphics[width=0.4275\textwidth]{../figs/Autocorrelation_time_Metropolis.pdf}
     \caption{\label{fig:Autocorrelation_Time_Metropolis}Autocorrelation times as a function of temperature for the Metropolis algorithm for different lattice sizes.}
 \end{figure}
-\bigskip\\
+\par
 Fig.~\ref{fig:Autocorrelation_Metropolis} visualizes the autocorrelation values as a function of time steps for different temperatures when using the Metropolis algorithm.
 Apparent is the separation between lower and higher temperatures, where lower temperatures show a much slower decay than higher temperatures.
 In Fig.~\ref{fig:Autocorrelation_Time_Metropolis} the autocorrelation time has been extracted, which highlights this effect.
@@ -74,7 +70,7 @@ Only along the border of such clusters lies the highest probability for a propos
     \includegraphics[width=0.4275\textwidth]{../figs/Autocorrelation_time_Wolff.pdf}
     \caption{\label{fig:Autocorrelation_Time_Wolff}Autocorrelation times as a function of temperature for the Wolff algorithm for different lattice sizes.}
 \end{figure}
-\bigskip\\
+\par
 Fig.~\ref{fig:Autocorrelation_Wolff} and Fig.~\ref{fig:Autocorrelation_Time_Wolff} now display the autocorrelation values and times for the Wolff algorithm.
 The same general behavior can be seen here as well; higher autocorrelation times for lower temperatures.
 But unlike the case of the Metropolis algorithm, the autocorrelation times are significantly lower, up to 2 orders of magnitude.
@@ -86,9 +82,9 @@ By determining the temperature at which the peaks arise, we can extrapolate the 
 Performing a line fit through the peak temperatures will then give us an estimate for $T_c$ and the critical exponent $\nu$.
 \begin{figure}
     \includegraphics[width=0.4275\textwidth]{../figs/TC_fit.pdf}
-    \caption{\label{fig:TC_fit}Plottet are the temperatures at which $\chi$ peaks for various lattice sizes. Fittet through is a line according to eq.~(\ref{eq:bkt_scaling}).}
+    \caption{\label{fig:TC_fit}Plottet are the temperatures at which $\chi$ peaks for various lattice sizes. Fittet is a line according to eq.~(\ref{eq:bkt_scaling}).}
 \end{figure}
-\bigskip\\
+\par
 Fig.~\ref{fig:TC_fit} displays the peak temperatures $T_{C, \chi} (L)$ with a line fit using $T_c(L) = T_c(\infty) + \text{A}\cdot \ln(L)^{-1/\nu}$.
 The fittet parameters are found to be $T_c(\infty) = 0.884 \pm 0.026$ and $\nu = 0.562 \pm 0.057$.
 Within the standard deviation, the estimated critical temperature is consistent with the theoretical value of $T_c = 0.89294$ \cite{Hasenbusch2005}.
@@ -98,16 +94,43 @@ Adding more data points for larger lattice sizes could potentially improve the e
 \subsection{Data Collapse}
 Using the estimated values for $T_c$ and $\nu$, we can perform a data collapse technique for the susceptibility, by scaling the coordinates according to eq.~(\ref{eq:Susceptibility_Scale}).
 By plotting the the scaled values of the measured susceptibility $\chi(L,t)\cdot L^{-\frac{\gamma}{\nu}}$ against $L\cdot \exp (-b \cdot t^{-\nu})$, the datapoints for all lattice sizes should collapse onto a single curve, given appropriate values for the parameters are provided.
-\begin{figure}
+\begin{figure}[h]
     \includegraphics[width=0.4275\textwidth]{../figs/Data_Collapse_X.pdf}
     \caption{\label{fig:Data_Collapse}Rescaled values of the susceptibility $\chi(L,t)\cdot L^{-\frac{\gamma}{\nu}}$ plotted against $L\cdot \exp (-b \cdot t^{-\nu})$ for all lattice sizes. $T_c$ and $\nu$ have been taken from the previous section, while $\gamma$ and $b$ are estimated by eye to achieve the best collapse.}
 \end{figure}
-\bigskip\\
+\par
 Fig.~\ref{fig:Data_Collapse} illustrates the data collapse using visually estimated parameters.
 Choosing $\gamma = 1 \pm 0.01$ and $b = 1.68 \pm 0.03$, the data collapse seems visually acceptable.
 This estimation for the critical exponent of the susceptibility $\gamma = 1 \pm 0.01$ is consistent with the theoretical ratio of $\gamma / \nu = 2 - \eta$ \cite{Kosterlitz1974}, with $\eta = 1/4$, so that $\gamma / \nu = 1.75$, which is within the confidence interval.
-\\
+\par
 It is possible to estimate all four parameters independently of the curve fit from the last subsection, however it turned out to be very difficult to balance them out for an acceptable data collapse simply by visual judgement.
 We also attempted to quantify the data collapse by measuring the squared distances of the peaks on the scaled $\chi$ values, and minimizing this quantity using the \texttt{migrad()} function in the \texttt{iMinuit} Python library.
 However, this approach collapsed the data onto either a single point or a single straight line, yielding unreasonable values for the parameters. 
 
+\subsection{XY model on a 3D lattice}
+The XY model is not necessarily restricted to a two dimensional lattice.
+In order to apply it to a 3d lattice, or potentially even higher dimensions, the Metropolis and Wolff algorithm, and the extraction of the energy $E$ and magnetization $M$ have to be adjusted to account for the newly added neighbors.
+After the adjustment, the measurement can be performed in the same manner as for the 2D case.
+The analysis will also be analogous, and the relevant plots can be found in Appendix~\ref{fig:3DWolff_Energy_SpecificHeat}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4275\textwidth]{../figs/3DWolff_X.pdf}
+    \caption{\label{fig:3DWolff_x}Measured susceptibility on the 3D lattice using the Wolff algorithm.}
+\end{figure}
+\par
+Fig.~\ref{fig:3DWolff_x} displays the susceptibility on the 3D lattice for lattice sizes of $L={6,7,8,9,10,11,12}$, generated using the Wolff algorithm.
+Due to the increased computation times in the higher dimension, larger lattices have not been simulated.
+A similar behavior for $\chi$ can be observed as for the 2D case, with an apparent critical temperature at around $T_c \approx 2.2$, which is significantly higher than the critical temperature for the 2D case.
+However, the smaller lattice sizes made it difficult to define a clear peak, and as such the method of fitting a line through the curve did not yield meaningful results.
+But, it is still possible to perform the data collapse method.
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.4275\textwidth]{../figs/3DData_Collapse_X.pdf}
+    \caption{\label{fig:3DData_Collapse_X}Rescaled values of the susceptibility $\chi(L,t)\cdot L^{-\frac{\gamma}{\nu}}$ plotted against $L\cdot \exp (-b \cdot t^{-\nu})$ simulated using Wolff. $T_c$, $\nu$, $\gamma$ and $b$ are estimated by eye to achieve the best collapse.}
+\end{figure}
+\par
+Fig.~\ref{fig:3DData_Collapse_X} illustrates the data collapse for the 3D case, using visually estimated parameters.
+The collapse was acceptable for values around $T_c = 2.2 \pm 0.1$, $\nu = 0.195 \pm 0.01$, $\gamma = 0.4 \pm 0.01$ and $b = 2.4 \pm 0.2$.
+The current leading estimate for the inverse critical temperature is $\beta=0.454165$, which corresponds to $T_c=2.201843$, which matches our estimation~\cite{Massimo2001}.
+However, the estimation for $\nu$ and $\gamma$ are deviating a lot from the literature values of $\nu = 0.67155$ and $\gamma = 1.3177$ \cite{Massimo2001}.
+Interestingly enough, their ratio $\gamma / \nu = 2.0513 \pm 0.5235$ does match within the error boundary.

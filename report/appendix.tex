@@ -1,17 +1,28 @@
 
 \appendix
-\section{Appendix}
+\section{}
 
+\setcounter{figure}{0}
+\renewcommand{\figurename}{Supplementary Figure}
+\renewcommand{\thefigure}{A\arabic{figure}}
 
-\begin{figure}[h]
+\begin{figure*}
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_E.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Metropolis_C.pdf}
     \label{fig:Metropolis_Energy_SpecificHeat}
     \caption{Energy and specific Heat calculated using the Metropolis algorithm}
-\end{figure}
-\begin{figure}[h]
+\end{figure*}
+\begin{figure*}
     \includegraphics[width=0.4275\textwidth]{../figs/Wolff_E.pdf}
     \includegraphics[width=0.4275\textwidth]{../figs/Wolff_C.pdf}
     \label{fig:Wolff_Energy_SpecificHeat}
-    \caption{Energy and specific Heat calculated using the Wolff algorithm}
-\end{figure}
+    \caption{Energy and specific heat calculated using the Wolff algorithm}
+\end{figure*}
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.4275\textwidth]{../figs/3DWolff_E.pdf}
+    \includegraphics[width=0.4275\textwidth]{../figs/3DWolff_C.pdf}
+    \includegraphics[width=0.4275\textwidth]{../figs/3DWolff_M.pdf}
+    \label{fig:3DWolff_Energy_SpecificHeat}
+    \caption{Measured Energy, specific heat and magnetization on a 3D lattice using the Wolff algorithm}
+\end{figure*}
