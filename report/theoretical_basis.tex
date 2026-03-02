@@ -56,7 +56,7 @@ The Wolff algorithm is an efficient cluster update method that dramatically redu
 Unlike single-spin flips, it builds and flips entire correlated clusters of spins:
 \begin{enumerate}
   \item Chose a random reflection angle $\rho \sim U[0, 2\pi)$ and a random lattice site $s_i$ as the clusters root.
-  \item Flip $s_i \rightarrow s_i = (\cos(2\rho - \theta_x + \pi), \sin(2\rho - \theta_x + \pi))$
+  \item Flip $s_i \rightarrow s_i = (\cos(2\rho - \theta_i + \pi), \sin(2\rho - \theta_i + \pi))$
   \item Visit all neighboring sites, and activate the bond to $s_i$ with probability
   $$
     p_{i,j} = 1 - \exp \left\{2/T \cdot \cos(\rho - \theta_i)\cos(\rho - \theta_j)\right\} 
@@ -111,13 +111,15 @@ A value of $\eta = 1/4$ is the same as that of the Ising model predicted by Onsa
 
 \subsection{Finite Size Scaling (FSS)}
 Finite size scaling analyzes how the observables behave as a function of system size $L = \sqrt{N}$ near criticality ~\cite{Privman1989}.
-For the XY model near the Berezinskii-Kosterlitz-Thouless transition a key observable is the susceptibility $\chi_L(T)$, which scales as:
+In theory, the correlation length diverges at $T_c$, but for a finite system size it is bounded by $L$.
+Thus, one expects the observables to exhibit such a scaling behavior.
+So, for the XY model near the phase transition, the susceptibility $\chi_L(T)$ scales as
 
 \begin{equation}
-  \chi(L,t) \approx L^{\gamma/\nu} \,\hat{\chi}\!\left( L \exp\!\left(-b\, t^{-\nu}\right) \right)
+  \chi(L,t) \approx L^{\gamma/\nu} \,\hat{\chi}\!\left( L \exp\!\left(-b\, t^{-\nu}\right) \right) \;,
   \label{eq:Susceptibility_Scale}
 \end{equation}
-, with $t$ the reduced temperature, $b$ a non-universal constant, and $\nu$ is a critical exponent related to the correlation length \cite{Sale2021}.
+with $t$ the reduced temperature, $b$ a non-universal constant, and $\nu$ is a critical exponent related to the correlation length~\cite{Sale2021}.
 By scaling the data for various lattice sizes accordingly, the curves will collapse onto a single universal curve, allowing the exctraction of the critical exponents and critical temperature.
 
 Another method to extract these quantities, is by fitting a line through the peak positions $T_c(L)$ of the susceptibility as a function of lattice size.
@@ -126,7 +128,7 @@ The peak positions scale according to
   T_c(L) - T_c(\infty) \propto \frac{1}{\log (L)^{1/\nu}} \;,
   \label{eq:bkt_scaling}
 \end{equation}
-so $T_c$ and $\nu$ can be obtained from the fit parameters.
+so $T_c$ and $\nu$ can be obtained from the fit parameters~\cite{Sale2021}
 
 \subsection{Autocorrelation}
 Generally speaking, the autocorrelation function $C_X(t)$ of an observable $X$ measures how correlated the values of $X$ are at different time steps $t$.
@@ -152,4 +154,4 @@ Hence, one defines the exponential autocorrelation time by
   \tau_{\exp}\stackrel{\mathrm{def}}{=}\limsup_{t\to\infty}\frac{-t}{\ln\!\bigl|\Gamma_X(t)\bigr|}\,.
   \label{eq:Autocorrelation_Time}
 \end{equation}
-It is the time needed for the autocorrelation to be reduced by a factor of order $e$.~\cite{PetschliesUrbach2026}
+It is the time needed for the autocorrelation to be reduced by a factor of order $e$, and needs to be taken into account when generating statistically independen MCMC configurations.~\cite{PetschliesUrbach2026}
