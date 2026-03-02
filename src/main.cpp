@@ -6,6 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include "XYModel.hpp"
 
 std::vector<double> linspace(double a, double b, int steps) {
   std::vector<double> result(steps, 0.0);
@@ -16,13 +17,14 @@ std::vector<double> linspace(double a, double b, int steps) {
   return result;
 }
 
-class XYModel {
+class XYModel3D {
 private:
   std::mt19937 rng;
   std::uniform_real_distribution<double> rand;
   std::uniform_real_distribution<double> randPI;
   int Nx;
   int Ny;
+  int Nz;
 
 public:
   std::vector<double> spins;
@@ -30,7 +32,7 @@ public:
 
   // Class constructor
 public:
-  XYModel(int Nx, int Ny, float T = 1.0): Nx(Nx), Ny(Ny), T(T) {
+  XYModel3D(int Nx, int Ny, int Nz, float T = 1.0): Nx(Nx), Ny(Ny), Nz(Nz), T(T) {
     spins = std::vector<double>(Nx * Ny, 0.0);
     std::random_device seed;
     rng = std::mt19937(seed());
@@ -43,11 +45,12 @@ private:
   double randomAngle() { return randPI(rng); }
 
 public:
-  void resize(int Nx, int Ny) {
+  void resize(int Nx, int Ny, int Nz) {
     this->Nx = Nx;
     this->Ny = Ny;
+    this->Nz = Nz;
 
-    spins.resize(Nx * Ny);
+    spins.resize(Nx * Ny * Nz);
     std::fill(spins.begin(), spins.end(), 0.0);
   }
 
@@ -56,7 +59,7 @@ public:
       double angle = randomAngle();
       std::fill(spins.begin(), spins.end(), angle);
     } else {
-      std::generate(spins.begin(), spins.end(), std::bind(&XYModel::randomAngle, this));
+      std::generate(spins.begin(), spins.end(), std::bind(&XYModel3D::randomAngle, this));
     }
     
   };
@@ -67,61 +70,72 @@ public:
       sumX += std::cos(spin);
       sumY += std::sin(spin);
     }
-    return std::hypot(sumX, sumY) / Nx/Ny;
+    return std::hypot(sumX, sumY) / Nx/Ny/Nz;
   }
 
   double Energy() {
     double sum = 0;
-    for (int y = 0; y < Ny; y++) {
-      for (int x = 0; x < Nx; x++) {
-        sum -= (
-          std::cos(spins[y * Nx + x] - spins[y * Nx + (x + 1) % Nx]) +
-          std::cos(spins[y * Nx + x] - spins[((y + 1) % Ny) * Nx + x])
-        );
+    for (int z = 0; z < Nz; z++) {
+      for (int y = 0; y < Ny; y++) {
+        for (int x = 0; x < Nx; x++) {
+          sum -= (
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[z * Nx*Ny + y * Nx + ((x + 1) % Nx)]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[z * Nx*Ny + ((y + 1) % Ny) * Nx + x]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[((z + 1) % Nz) * Nx*Ny + y * Nx + x])
+            // std::cos(spins[y * Nx + x] - spins[y * Nx + (x + 1) % Nx]) +
+            // std::cos(spins[y * Nx + x] - spins[((y + 1) % Ny) * Nx + x])
+          );
+        }
       }
     }
-    return sum / Nx/Ny;
+    return sum / Nx/Ny/Nz;
   }
 
   void Metropolis() {
     double energy_now, energy_after, delta;
 
-    for (int y = 0; y < Ny; y++) {
-      for (int x = 0; x < Nx; x++) {
-        energy_now = -(
-          std::cos(spins[y * Nx + x] - spins[y * Nx + ((x + 1) % Nx)]) +
-          std::cos(spins[y * Nx + x] - spins[y * Nx + ((x - 1 + Nx) % Nx)]) +
-          std::cos(spins[y * Nx + x] - spins[((y + 1) % Ny) * Nx + x]) +
-          std::cos(spins[y * Nx + x] - spins[((y - 1 + Ny) % Ny) * Nx + x])
-        );
+    for (int z = 0; z < Nz; z++) {
+      for (int y = 0; y < Ny; y++) {
+        for (int x = 0; x < Nx; x++) {
+          energy_now = -(
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[z * Nx*Ny + y * Nx + ((x + 1) % Nx)]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[z * Nx*Ny + y * Nx + ((x - 1 + Nx) % Nx)]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[z * Nx*Ny + ((y + 1) % Ny) * Nx + x]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[z * Nx*Ny + ((y - 1 + Ny) % Ny) * Nx + x]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[((z + 1) % Nz) * Nx*Ny + y * Nx + x]) + 
+            std::cos(spins[z * Nx*Ny + y * Nx + x] - spins[((z - 1 + Nz) % Nz) * Nx*Ny + y * Nx + x])
+          );
 
-        delta = randomAngle();
-        energy_after = -(
-          std::cos(spins[y * Nx + x] + delta - spins[y * Nx + ((x + 1) % Nx)]) +
-          std::cos(spins[y * Nx + x] + delta - spins[y * Nx + ((x - 1 + Nx) % Nx)]) +
-          std::cos(spins[y * Nx + x] + delta - spins[((y + 1) % Ny) * Nx + x]) +
-          std::cos(spins[y * Nx + x] + delta - spins[((y - 1 + Ny) % Ny) * Nx + x])
-        );
+          delta = randomAngle();
+          energy_after = -(
+            std::cos(spins[z * Nx*Ny + y * Nx + x] + delta - spins[z * Nx*Ny + y * Nx + ((x + 1) % Nx)]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] + delta - spins[z * Nx*Ny + y * Nx + ((x - 1 + Nx) % Nx)]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] + delta - spins[z * Nx*Ny + ((y + 1) % Ny) * Nx + x]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] + delta - spins[z * Nx*Ny + ((y - 1 + Ny) % Ny) * Nx + x]) +
+            std::cos(spins[z * Nx*Ny + y * Nx + x] + delta - spins[((z + 1) % Nz) * Nx*Ny + y * Nx + x]) + 
+            std::cos(spins[z * Nx*Ny + y * Nx + x] + delta - spins[((z - 1 + Nz) % Nz) * Nx*Ny + y * Nx + x])
+          );
 
-        if (energy_after < energy_now || random() < std::exp(-(energy_after - energy_now) / T)) {
-          spins[y * Nx + x] = std::fmod(spins[y * Nx + x] + delta + 2 * M_PI, 2 * M_PI);
+          if (energy_after < energy_now || random() < std::exp(-(energy_after - energy_now) / T)) {
+            spins[z * Nx*Ny + y * Nx + x] = std::fmod(spins[z * Nx*Ny + y * Nx + x] + delta + 2 * M_PI, 2 * M_PI);
+          }
         }
       }
     }
   }
 
   void Wolff() {
-    int flippedSpins = 0, i = 0, x, y;
-    std::vector<int> neighbors(4, 0);
+    int flippedSpins = 0, i = 0, x, y, z;
+    std::vector<int> neighbors(6, 0);
 
     do {
       auto r = randomAngle();
       
       std::queue<int> stack;
-      std::vector<bool> visited(Nx*Ny, false);
+      std::vector<bool> visited(Nx*Ny*Nz, false);
       int clusterSize = 0;
 
-      stack.push(static_cast<int>(random() * Nx*Ny));
+      stack.push(static_cast<int>(random() * Nx*Ny*Nz));
 
       while(!stack.empty()) {
         int s = stack.front();
@@ -129,12 +143,15 @@ public:
 
         spins[s] = std::fmod(2*r - spins[s] + 3*M_PI, 2 * M_PI);
         x = s % Nx;
-        y = s / Nx;
+        y = (s / Nx) % Ny;
+        z = s / (Nx*Ny);
 
-        neighbors[0] = ((y - 1 + Ny) % Ny) * Nx + x;  // top
-        neighbors[1] = y * Nx + ((x + 1) % Nx);       // right
-        neighbors[2] = ((y + 1) % Ny) * Nx + x;       // bottom
-        neighbors[3] = y * Nx + ((x - 1 + Nx) % Nx);  // left
+        neighbors[0] = z * Nx*Ny + y * Nx + ((x + 1) % Nx);
+        neighbors[1] = z * Nx*Ny + y * Nx + ((x - 1 + Nx) % Nx);
+        neighbors[2] = z * Nx*Ny + ((y + 1) % Ny) * Nx + x;
+        neighbors[3] = z * Nx*Ny + ((y - 1 + Ny) % Ny) * Nx + x;
+        neighbors[4] = ((z + 1) % Nz) * Nx*Ny + y * Nx + x;
+        neighbors[5] = ((z - 1 + Nz) % Nz) * Nx*Ny + y * Nx + x;
 
         for (const auto& neighbor: neighbors) {
           if (
@@ -153,27 +170,26 @@ public:
       // Attempt to flip Nx*Ny spin in total, in order 
       // to compare to Metropolis, which flips Nx*Ny spins.
       // If next cluster would exceed it, exit.
-    } while (flippedSpins * (1. + 1./i) < Nx*Ny);
+    } while (flippedSpins * (1. + 1./i) < Nx*Ny*Nz);
   }
 };
 
-void generateData() {
+void generateData(std::vector<int> gridSizes = std::vector({256, 128, 64, 32, 16, 8})) {
 
-  H5Easy::File output("../data/data.hdf5", H5Easy::File::Overwrite);
+  H5Easy::File output("../data/data3D.hdf5", H5Easy::File::Overwrite);
 
   const int N_BURN = 512;
   const int N_STEPS = 512;
-  const int N_T = 100;        // Number of points on the temperature grid.
-  const int REPETITIONS = 20; // to calculate mean and std.
+  const int N_T = 101;        // Number of points on the temperature grid.
+  const int REPETITIONS = 20; // To calculate mean and std.
 
   double _e, _m; // just placeholders, not really important
   
 
-  XYModel xy(1, 1);
+  XYModel3D xyz(1, 1, 1);
   
   // Setting temperature grid points
-  auto T = linspace(0.02, 2, N_T);
-  std::vector<int> gridSizes({256, 128, 64, 32, 16, 8});
+  auto T = linspace(1.75, 3.25, N_T);
   output.createDataSet("/T", T);
   output.createDataSet("/gridSizes", gridSizes);
     
@@ -185,25 +201,25 @@ void generateData() {
   std::vector X(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
 
 
-  // Wolff Algorithm here. Takes about ~4h
+  // Wolff Algorithm here. Takes about ~4h in 2D case.
   for (int n = 0; n < gridSizes.size(); n++) {
     int N = gridSizes[n];
-    xy.resize(N, N);
+    xyz.resize(N, N, N);
     
     for (int rep = 0; rep < REPETITIONS; rep++) {
-      xy.initializeData();
+      xyz.initializeData();
 
       for (int i = 0; i < N_T; i++) {
-        xy.T = T[i];
+        xyz.T = T[i];
         double e=0, m=0, e2=0, m2=0;
     
-        for (int i = 0; i < N_BURN; i++) xy.Wolff();
+        for (int i = 0; i < N_BURN; i++) xyz.Wolff();
       
         for (int i = 0; i < N_STEPS; i++) {
-          xy.Wolff();
+          xyz.Wolff();
       
-          _e = xy.Energy();
-          _m = xy.Magnetization();
+          _e = xyz.Energy();
+          _m = xyz.Magnetization();
       
           e += _e / N_STEPS;
           m += _m / N_STEPS;
@@ -212,8 +228,8 @@ void generateData() {
         }
         E[n][i][rep] = e;
         M[n][i][rep] = m;
-        C[n][i][rep] = (e2 - e*e) * N*N / T[i]/T[i];
-        X[n][i][rep] = (m2 - m*m) * N*N / T[i];
+        C[n][i][rep] = (e2 - e*e) * N*N*N / T[i]/T[i];
+        X[n][i][rep] = (m2 - m*m) * N*N*N / T[i];
     
         std::cout << "\rProgress: Wolff, N=" << N << " - " << (100.0 * (rep*N_T + i + 1)/(REPETITIONS*N_T)) << "%   " << std::flush;
       }
@@ -225,6 +241,9 @@ void generateData() {
   output.createDataSet("/Wolff/C", C);
   output.createDataSet("/Wolff/X", X);
 
+  // For 3d Model, only consider Wolff, as it's superior
+  // For 2d Model, remove the return statement.
+  return;
 
   // Use Metropolis now. Takes about ~4h
   E = std::vector(gridSizes.size(), std::vector(N_T, std::vector(REPETITIONS, 0.0)));
@@ -234,22 +253,22 @@ void generateData() {
 
   for (int n = 0; n < gridSizes.size(); n++) {
     int N = gridSizes[n];
-    xy.resize(N, N);
+    xyz.resize(N, N, N);
     
     for (int rep = 0; rep < REPETITIONS; rep++) {
-      xy.initializeData();
+      xyz.initializeData();
       
       for (int i = 0; i < N_T; i++) {
-        xy.T = T[i];
+        xyz.T = T[i];
         double e=0, m=0, e2=0, m2=0;
     
-        for (int i = 0; i < N_BURN; i++) xy.Metropolis();
+        for (int i = 0; i < N_BURN; i++) xyz.Metropolis();
       
         for (int i = 0; i < N_STEPS; i++) {
-          xy.Metropolis();
+          xyz.Metropolis();
       
-          _e = xy.Energy();
-          _m = xy.Magnetization();
+          _e = xyz.Energy();
+          _m = xyz.Magnetization();
       
           e += _e / N_STEPS;
           m += _m / N_STEPS;
@@ -258,8 +277,8 @@ void generateData() {
         }
         E[n][i][rep] = e;
         M[n][i][rep] = m;
-        C[n][i][rep] = (e2 - e*e) * N*N / T[i]/T[i];
-        X[n][i][rep] = (m2 - m*m) * N*N / T[i];
+        C[n][i][rep] = (e2 - e*e) * N*N*N / T[i]/T[i];
+        X[n][i][rep] = (m2 - m*m) * N*N*N / T[i];
     
         std::cout << "\rProgress: Metropolis, N=" << N << " - " << (100.0 * (rep*N_T + i + 1)/(REPETITIONS*N_T)) << "%   " << std::flush;
       }
@@ -272,20 +291,19 @@ void generateData() {
   output.createDataSet("/Metropolis/X", X);
 };
 
-void generateAutoCorrelationData() {
-  H5Easy::File output("../data/ac-times.hdf5", H5Easy::File::Overwrite);
+void generateAutoCorrelationData(std::vector<int> gridSizes = std::vector({8, 16, 32, 64, 128})) {
+  H5Easy::File output("../data/ac-times3D.hdf5", H5Easy::File::Overwrite);
 
   const int N_BURN = 500;
   const int N_MEAS = 5000;
   const int N_REP = 20; // Average over N_REP
 
-  std::vector<int> gridSizes({8, 16, 32, 64, 128});
   auto T = linspace(0.5, 1.5, 40);
 
   output.createDataSet("/grid", gridSizes);
   output.createDataSet("/T", T);
 
-  XYModel xy(1, 1);
+  XYModel3D xyz(1, 1, 1);
   
   auto run = [&](bool isWolff){
 
@@ -294,20 +312,20 @@ void generateAutoCorrelationData() {
   
     for (int i = 0; i < gridSizes.size(); i++) {
       int N = gridSizes[i];
-      xy.resize(N, N);
+      xyz.resize(N, N, N);
   
       for (int j = 0; j < T.size(); j++)  {
       
         for(int h = 0; h < N_REP; h++) {
-          xy.T = T[j];
-          xy.initializeData(true);
+          xyz.T = T[j];
+          xyz.initializeData(true);
           // configuration needs to be in equilibrium
-          for (int k = 0; k < N_BURN; k++) xy.Wolff(); // Wolff for faster burn in
+          for (int k = 0; k < N_BURN; k++) xyz.Wolff(); // Wolff for faster burn in
     
           double mean_m = 0.0;
           for (int k = 0; k < N_MEAS; k++) {
-            isWolff ? xy.Wolff() : xy.Metropolis();
-            M[k] = xy.Magnetization();
+            isWolff ? xyz.Wolff() : xyz.Metropolis();
+            M[k] = xyz.Magnetization();
             mean_m += M[k] / N_MEAS;
           }
     
@@ -352,5 +370,6 @@ void generateAutoCorrelationData() {
 int main() {
   // generateAutoCorrelationData();
   // generateData();
+  generateData(std::vector({6,7,8,9,10,11,12}));
   return 0;
 }
